@@ -1,161 +1,546 @@
 // src/components/BlackHoleBackground.jsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+// Make sure these paths are correct for your version (they seem to be)
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+
+// --- Shader and Constant Definitions ---
+const BLACK_HOLE_RADIUS = 1.3;
+const DISK_INNER_RADIUS = BLACK_HOLE_RADIUS + 0.2;
+const DISK_OUTER_RADIUS = 8.0;
+const DISK_TILT_ANGLE = Math.PI / 3.0;
+
+// Lensing Shader (runs on the GPU)
+const lensingShader = {
+    uniforms: {
+        "tDiffuse": { value: null },
+        "blackHoleScreenPos": { value: new THREE.Vector2(0.5, 0.5) },
+        "lensingStrength": { value: 0.12 },
+        "lensingRadius": { value: 0.3 },
+        "aspectRatio": { value: window.innerWidth / window.innerHeight },
+        "chromaticAberration": { value: 0.005 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform vec2 blackHoleScreenPos;
+        uniform float lensingStrength;
+        uniform float lensingRadius;
+        uniform float aspectRatio;
+        uniform float chromaticAberration;
+        varying vec2 vUv;
+        
+        void main() {
+            vec2 screenPos = vUv;
+            vec2 toCenter = screenPos - blackHoleScreenPos;
+            toCenter.x *= aspectRatio;
+            float dist = length(toCenter);
+            
+            float distortionAmount = lensingStrength / (dist * dist + 0.003);
+            distortionAmount = clamp(distortionAmount, 0.0, 0.7);
+            float falloff = smoothstep(lensingRadius, lensingRadius * 0.3, dist);
+            distortionAmount *= falloff;
+            
+            vec2 offset = normalize(toCenter) * distortionAmount;
+            offset.x /= aspectRatio;
+            
+            vec2 distortedUvR = screenPos - offset * (1.0 + chromaticAberration);
+            vec2 distortedUvG = screenPos - offset;
+            vec2 distortedUvB = screenPos - offset * (1.0 - chromaticAberration);
+            
+            float r = texture2D(tDiffuse, distortedUvR).r;
+            float g = texture2D(tDiffuse, distortedUvG).g;
+            float b = texture2D(tDiffuse, distortedUvB).b;
+            
+            gl_FragColor = vec4(r, g, b, 1.0);
+        }`
+};
+
+// Star Shader
+const starMaterialShader = {
+    uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) }
+    },
+    vertexShader: `
+        uniform float uTime;
+        uniform float uPixelRatio;
+        attribute float size;
+        attribute float twinkle;
+        varying vec3 vColor;
+        varying float vTwinkle;
+        
+        void main() {
+            vColor = color;
+            vTwinkle = sin(uTime * 2.5 + twinkle) * 0.5 + 0.5;
+            
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = size * uPixelRatio * (300.0 / -mvPosition.z);
+            gl_Position = projectionMatrix * mvPosition;
+        }
+    `,
+    fragmentShader: `
+        varying vec3 vColor;
+        varying float vTwinkle;
+        
+        void main() {
+            float dist = distance(gl_PointCoord, vec2(0.5));
+            if (dist > 0.5) discard;
+            
+            float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+            alpha *= (0.2 + vTwinkle * 0.8);
+            
+            gl_FragColor = vec4(vColor, alpha);
+        }
+    `
+};
+
+// Event Horizon Shader
+const eventHorizonShader = {
+    uniforms: {
+        uTime: { value: 0 },
+        uCameraPosition: { value: new THREE.Vector3() }
+    },
+    vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uCameraPosition;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        
+        void main() {
+            vec3 viewDirection = normalize(uCameraPosition - vPosition);
+            float fresnel = 1.0 - abs(dot(vNormal, viewDirection));
+            fresnel = pow(fresnel, 2.5);
+            
+            vec3 glowColor = vec3(1.0, 0.4, 0.1);
+            float pulse = sin(uTime * 2.5) * 0.15 + 0.85;
+            
+            gl_FragColor = vec4(glowColor * fresnel * pulse, fresnel * 0.4);
+        }
+    `
+};
+
+// Accretion Disk Shader
+const diskShader = {
+    uniforms: {
+        uTime: { value: 0.0 },
+        uColorHot: { value: new THREE.Color(0xffffff) },
+        uColorMid1: { value: new THREE.Color(0xff7733) },
+        uColorMid2: { value: new THREE.Color(0xff4477) },
+        uColorMid3: { value: new THREE.Color(0x7744ff) },
+        uColorOuter: { value: new THREE.Color(0x4477ff) },
+        uNoiseScale: { value: 2.5 },
+        uFlowSpeed: { value: 0.22 },
+        uDensity: { value: 1.3 }
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        varying float vRadius;
+        varying float vAngle;
+        void main() {
+            vUv = uv;
+            vRadius = length(position.xy);
+            vAngle = atan(position.y, position.x);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColorHot;
+        uniform vec3 uColorMid1;
+        uniform vec3 uColorMid2;
+        uniform vec3 uColorMid3;
+        uniform vec3 uColorOuter;
+        uniform float uNoiseScale;
+        uniform float uFlowSpeed;
+        uniform float uDensity;
+        varying vec2 vUv;
+        varying float vRadius;
+        varying float vAngle;
+
+        // GLSL 3D simplex noise function
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        float snoise(vec3 v) {
+            const vec2 C = vec2(1.0/6.0, 1.0/3.0); const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i  = floor(v + dot(v, C.yyy) ); vec3 x0 = v - i + dot(i, C.xxx) ;
+            vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g; vec3 i1 = min( g.xyz, l.zxy ); vec3 i2 = max( g.xyz, l.zxy );
+            vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + C.yyy; vec3 x3 = x0 - D.yyy;
+            i = mod289(i);
+            vec4 p = permute( permute( permute( i.z + vec4(0.0, i1.z, i2.z, 1.0 )) + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+            float n_ = 0.142857142857; vec3  ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+            vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_ );
+            vec4 x = x_ *ns.x + ns.yyyy; vec4 y = y_ *ns.x + ns.yyyy; vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4( x.xy, y.xy ); vec4 b1 = vec4( x.zw, y.zw );
+            vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0; vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+            vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
+            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+            m = m * m;
+            return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+        }
+
+        void main() {
+            float normalizedRadius = smoothstep(${DISK_INNER_RADIUS.toFixed(2)}, ${DISK_OUTER_RADIUS.toFixed(2)}, vRadius);
+            float spiral = vAngle * 3.0 - (1.0 / (normalizedRadius + 0.1)) * 2.0;
+            vec2 noiseUv = vec2(vUv.x + uTime * uFlowSpeed * (2.0 / (vRadius * 0.3 + 1.0)) + sin(spiral) * 0.1, vUv.y * 0.8 + cos(spiral) * 0.1);
+            float noiseVal1 = snoise(vec3(noiseUv * uNoiseScale, uTime * 0.15));
+            float noiseVal2 = snoise(vec3(noiseUv * uNoiseScale * 3.0 + 0.8, uTime * 0.22));
+            float noiseVal3 = snoise(vec3(noiseUv * uNoiseScale * 6.0 + 1.5, uTime * 0.3));
+            float noiseVal = (noiseVal1 * 0.45 + noiseVal2 * 0.35 + noiseVal3 * 0.2);
+            noiseVal = (noiseVal + 1.0) * 0.5;
+            
+            vec3 color = uColorOuter;
+            color = mix(color, uColorMid3, smoothstep(0.0, 0.25, normalizedRadius));
+            color = mix(color, uColorMid2, smoothstep(0.2, 0.55, normalizedRadius));
+            color = mix(color, uColorMid1, smoothstep(0.5, 0.75, normalizedRadius));
+            color = mix(color, uColorHot, smoothstep(0.7, 0.95, normalizedRadius));
+            
+            color *= (0.5 + noiseVal * 1.0);
+            float brightness = pow(1.0 - normalizedRadius, 1.0) * 3.5 + 0.5;
+            brightness *= (0.3 + noiseVal * 2.2);
+            float pulse = sin(uTime * 1.8 + normalizedRadius * 12.0 + vAngle * 2.0) * 0.15 + 0.85;
+            brightness *= pulse;
+            
+            float alpha = uDensity * (0.2 + noiseVal * 0.9);
+            alpha *= smoothstep(0.0, 0.15, normalizedRadius);
+            alpha *= (1.0 - smoothstep(0.85, 1.0, normalizedRadius));
+            alpha = clamp(alpha, 0.0, 1.0);
+            gl_FragColor = vec4(color * brightness, alpha);
+        }
+    `
+};
+
+
+// --- React Component ---
 
 const BlackHoleBackground = () => {
-  const mountRef = useRef(null);
+    const mountRef = useRef(null);
+    const controlsRef = useRef(null);
+    const [autoRotate, setAutoRotate] = useState(false);
+    const [infoVisible, setInfoVisible] = useState(true);
 
-  useEffect(() => {
-    const mount = mountRef.current;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    useEffect(() => {
+        const mount = mountRef.current;
+        let animationFrameId;
+        let resizeTimeout;
 
-    // Scene setup
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020104, 0.025);
 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.z = 150;
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 4000);
+        camera.position.set(-6.5, 5.0, 6.5);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(width, height);
-    mount.appendChild(renderer.domElement);
+        const cameraRig = new THREE.Group();
+        cameraRig.add(camera);
+        scene.add(cameraRig);
 
-    // Black hole core
-    const coreGeometry = new THREE.SphereGeometry(12, 64, 64);
-    const coreMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const core = new THREE.Mesh(coreGeometry, coreMaterial);
-    core.position.x = 25;
-    scene.add(core);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        
+        // --- THIS IS THE FIX ---
+        renderer.outputEncoding = THREE.sRGBEncoding; 
+        // -------------------------
 
-    // Event horizon glow
-    const glowGeometry = new THREE.SphereGeometry(14, 64, 64);
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.4,
-    });
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    glow.position.x = 25;
-    scene.add(glow);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        mount.appendChild(renderer.domElement);
 
-    // Accretion disk
-    const diskGeometry = new THREE.TorusGeometry(22, 4, 32, 200);
-    const diskMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffcc00,
-      emissive: 0xff9900,
-      shininess: 100,
-      transparent: true,
-      opacity: 0.7,
-    });
-    const disk = new THREE.Mesh(diskGeometry, diskMaterial);
-    disk.rotation.x = Math.PI / 2;
-    disk.position.x = 25;
-    scene.add(disk);
+        // --- Post-processing ---
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.7, 0.8
+        );
+        composer.addPass(bloomPass);
 
-    // Photon ring
-    const ringGeometry = new THREE.TorusGeometry(16, 0.8, 32, 200);
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffff66,
-      transparent: true,
-      opacity: 0.9,
-    });
-    const photonRing = new THREE.Mesh(ringGeometry, ringMaterial);
-    photonRing.rotation.x = Math.PI / 2;
-    photonRing.position.x = 25;
-    scene.add(photonRing);
+        const lensingPass = new ShaderPass(lensingShader);
+        composer.addPass(lensingPass);
 
-    // 3D orbital particles
-    const particlesCount = 1200;
-    const positions = new Float32Array(particlesCount * 3);
-    const angles = new Float32Array(particlesCount);
-    const radii = new Float32Array(particlesCount);
-    const inclinations = new Float32Array(particlesCount);
+        // --- Controls ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.dampingFactor = 0.035;
+        controls.rotateSpeed = 0.4; controls.autoRotate = autoRotate;
+        controls.autoRotateSpeed = 0.1;
+        controls.target.set(0, 0, 0);
+        controls.minDistance = 2.5;
+        controls.maxDistance = 100;
+        controls.enablePan = false;
+        controls.update();
+        controlsRef.current = controls; // Save ref for button
 
-    for (let i = 0; i < particlesCount; i++) {
-      const radius = 40 + Math.random() * 150; // distance from black hole
-      const angle = Math.random() * Math.PI * 2; // longitude
-      const inclination = (Math.random() - 0.5) * Math.PI / 4; // tilt angle
+        // --- Mouse Listener for Parallax ---
+        const mouse = new THREE.Vector2(0, 0);
+        const onMouseMove = (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        };
+        window.addEventListener('mousemove', onMouseMove);
 
-      radii[i] = radius;
-      angles[i] = angle;
-      inclinations[i] = inclination;
+        // --- Starfield ---
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 150000;
+        const starPositions = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+        const starSizes = new Float32Array(starCount);
+        const starTwinkle = new Float32Array(starCount);
+        const starFieldRadius = 2000;
+        const starPalette = [
+            new THREE.Color(0x88aaff), new THREE.Color(0xffaaff), new THREE.Color(0xaaffff),
+            new THREE.Color(0xffddaa), new THREE.Color(0xffeecc), new THREE.Color(0xffffff),
+            new THREE.Color(0xff8888), new THREE.Color(0x88ff88), new THREE.Color(0xffff88),
+            new THREE.Color(0x88ffff)
+        ];
 
-      positions[i * 3] = 25 + Math.cos(angle) * radius * Math.cos(inclination);
-      positions[i * 3 + 1] = Math.sin(angle) * radius;
-      positions[i * 3 + 2] = Math.cos(angle) * radius * Math.sin(inclination);
-    }
+        for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            const phi = Math.acos(-1 + (2 * i) / starCount);
+            const theta = Math.sqrt(starCount * Math.PI) * phi;
+            const radius = Math.cbrt(Math.random()) * starFieldRadius + 100;
 
-    const particlesGeometry = new THREE.BufferGeometry();
-    particlesGeometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(positions, 3)
+            starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+            starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            starPositions[i3 + 2] = radius * Math.cos(phi);
+
+            const starColor = starPalette[Math.floor(Math.random() * starPalette.length)].clone();
+            starColor.multiplyScalar(Math.random() * 0.7 + 0.3);
+            starColors[i3] = starColor.r; starColors[i3 + 1] = starColor.g; starColors[i3 + 2] = starColor.b;
+            starSizes[i] = THREE.MathUtils.randFloat(0.6, 3.0);
+            starTwinkle[i] = Math.random() * Math.PI * 2;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+        starGeometry.setAttribute('twinkle', new THREE.BufferAttribute(starTwinkle, 1));
+
+        const starMaterial = new THREE.ShaderMaterial({
+            ...starMaterialShader,
+            transparent: true,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // --- Event Horizon ---
+        const eventHorizonGeom = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05, 128, 64);
+        const eventHorizonMat = new THREE.ShaderMaterial({
+            ...eventHorizonShader,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide
+        });
+        const eventHorizon = new THREE.Mesh(eventHorizonGeom, eventHorizonMat);
+        scene.add(eventHorizon);
+
+        // --- Black Hole Sphere ---
+        const blackHoleGeom = new THREE.SphereGeometry(BLACK_HOLE_RADIUS, 128, 64);
+        const blackHoleMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const blackHoleMesh = new THREE.Mesh(blackHoleGeom, blackHoleMat);
+        blackHoleMesh.renderOrder = 0;
+        scene.add(blackHoleMesh);
+
+        // --- Accretion Disk ---
+        const diskGeometry = new THREE.RingGeometry(DISK_INNER_RADIUS, DISK_OUTER_RADIUS, 256, 128);
+        const diskMaterial = new THREE.ShaderMaterial({
+            ...diskShader,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+        const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+        accretionDisk.rotation.x = DISK_TILT_ANGLE;
+        accretionDisk.renderOrder = 1;
+        scene.add(accretionDisk);
+
+        // --- Hide Info Box Timer ---
+        const infoTimer = setTimeout(() => setInfoVisible(false), 5000);
+
+        // --- Resize Handler ---
+        const onResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                composer.setSize(window.innerWidth, window.innerHeight);
+                bloomPass.resolution.set(window.innerWidth, window.innerHeight);
+                lensingPass.uniforms.aspectRatio.value = window.innerWidth / window.innerHeight;
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+            }, 150);
+        };
+        window.addEventListener('resize', onResize);
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+        const blackHoleScreenPosVec3 = new THREE.Vector3();
+
+        const animate = () => {
+            animationFrameId = requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            const deltaTime = clock.getDelta();
+
+            // Apply mouse parallax
+            const targetRotationX = mouse.y * 0.1;
+            const targetRotationY = mouse.x * 0.1;
+            cameraRig.rotation.x += (targetRotationX - cameraRig.rotation.x) * 0.05;
+            cameraRig.rotation.y += (targetRotationY - cameraRig.rotation.y) * 0.05;
+
+            // Update uniforms
+            diskMaterial.uniforms.uTime.value = elapsedTime;
+            starMaterial.uniforms.uTime.value = elapsedTime;
+            eventHorizonMat.uniforms.uTime.value = elapsedTime;
+            // Get the camera's world position for the fresnel shader
+            const cameraWorldPos = new THREE.Vector3();
+            camera.getWorldPosition(cameraWorldPos);
+            eventHorizonMat.uniforms.uCameraPosition.value.copy(cameraWorldPos);
+
+            // Update lensing position
+            blackHoleScreenPosVec3.copy(blackHoleMesh.position).project(camera);
+            lensingPass.uniforms.blackHoleScreenPos.value.set(
+                (blackHoleScreenPosVec3.x + 1) / 2,
+                (blackHoleScreenPosVec3.y + 1) / 2
+            );
+
+            controls.update();
+            stars.rotation.y += deltaTime * 0.003;
+            stars.rotation.x += deltaTime * 0.001;
+            accretionDisk.rotation.z += deltaTime * 0.005;
+
+            composer.render(deltaTime);
+        };
+        animate();
+
+        // --- Cleanup ---
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            clearTimeout(infoTimer);
+            clearTimeout(resizeTimeout);
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('resize', onResize);
+            if (mount.contains(renderer.domElement)) {
+                mount.removeChild(renderer.domElement);
+            }
+
+            // Dispose of all Three.js objects
+            scene.traverse((object) => {
+                if (object.geometry) object.geometry.dispose();
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach(material => material.dispose());
+                    } else {
+                        // Check for dispose method on material
+                        if (typeof object.material.dispose === 'function') {
+                            object.material.dispose();
+                        }
+                    }
+                }
+            });
+            starGeometry.dispose();
+            starMaterial.dispose();
+            eventHorizonGeom.dispose();
+            eventHorizonMat.dispose();
+            blackHoleGeom.dispose();
+            blackHoleMat.dispose();
+            diskGeometry.dispose();
+            diskMaterial.dispose();
+            
+            composer.dispose();
+            bloomPass.dispose();
+            lensingPass.dispose();
+            renderer.dispose();
+            controls.dispose();
+        };
+    }, [autoRotate]); // Re-run effect if autoRotate changes to update controls
+
+    // --- UI Button Handler ---
+    const handleToggleAutoRotate = () => {
+        const newAutoRotateState = !autoRotate;
+        setAutoRotate(newAutoRotateState);
+        if (controlsRef.current) {
+            controlsRef.current.autoRotate = newAutoRotateState;
+        }
+    };
+
+    // --- JSX to Render ---
+    return (
+        <div style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '100vw', // Use vw/vh for full viewport
+            height: '100vh', 
+            zIndex: -1, 
+            overflow: 'hidden', // Prevent scrollbars
+            background: 'radial-gradient(ellipse at center, #1e1e1e 0%, #1e1e1e 70%)', // Add background here
+            fontFamily: "'Inter', sans-serif", // Ensure font is loaded
+            color: '#e0e0ff' // Default text color
+        }}>
+            {/* The Three.js canvas will be injected here */}
+            <div ref={mountRef} />
+            
+            {/* UI Elements */}
+            <div id="info" style={{ 
+                position: 'absolute',
+                top: '20px',
+                width: '100%',
+                textAlign: 'center',
+                color: 'rgba(220, 220, 255, 0.9)',
+                fontSize: '18px',
+                letterSpacing: '0.5px',
+                pointerEvents: 'none',
+                zIndex: 100,
+                textShadow: '0 1px 5px rgba(0, 0, 0, 0.7)',
+                opacity: infoVisible ? 1 : 0, 
+                transition: 'opacity 2s ease-in-out' 
+            }}>
+            </div>
+            
+            <div id="controls" className="ui-panel" style={{
+                /* Base styles are in style.css, this component manages its own position */
+                position: 'absolute',
+                bottom: '20px',
+                right: '20px',
+                zIndex: 50
+            }}>
+                <div id="autoRotateToggle" title="Toggle automatic rotation" onClick={handleToggleAutoRotate} style={{
+                    cursor: 'pointer', 
+                    padding: '8px 5px', 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    gap: '8px', 
+                    color: 'inherit', 
+                    fontSize: 'inherit', 
+                    transition: 'color 0.2s ease'
+                }}>
+
+                </div>
+            </div>
+        </div>
     );
-
-    const particlesMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 1.5,
-      transparent: true,
-      opacity: 0.8,
-    });
-
-    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particles);
-
-    // Mouse interaction
-    const mouse = { x: 0 };
-    const onMouseMove = (event) => {
-      mouse.x = (event.clientX / width) * 2 - 1; // -1 left, +1 right
-    };
-    window.addEventListener('mousemove', onMouseMove);
-
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      // Rotate glow, disk, photon ring slowly
-      glow.rotation.y += 0.001;
-      disk.rotation.z += 0.002;
-      photonRing.rotation.z += 0.003;
-
-      // Update particle positions (3D orbital motion)
-      const pos = particlesGeometry.attributes.position.array;
-      for (let i = 0; i < particlesCount; i++) {
-        const baseSpeed = 0.001 + (200 - radii[i]) * 0.00002;
-        const speed = baseSpeed + mouse.x * 0.002; // mouse modifies direction
-
-        angles[i] += speed;
-
-        pos[i * 3] = 25 + Math.cos(angles[i]) * radii[i] * Math.cos(inclinations[i]);
-        pos[i * 3 + 1] = Math.sin(angles[i]) * radii[i];
-        pos[i * 3 + 2] = Math.cos(angles[i]) * radii[i] * Math.sin(inclinations[i]);
-      }
-      particlesGeometry.attributes.position.needsUpdate = true;
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Resize handler
-    const onResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    window.addEventListener('resize', onResize);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', onResize);
-      mount.removeChild(renderer.domElement);
-      renderer.dispose();
-    };
-  }, []);
-
-  return <div className="blackhole-canvas" ref={mountRef}></div>;
 };
 
 export default BlackHoleBackground;
