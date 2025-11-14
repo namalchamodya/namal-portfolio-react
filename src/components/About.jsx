@@ -38,7 +38,7 @@ const About = () => {
 
           <div className="about-cta">
             <a href="#contact" className="btn primary-btn">Get In Touch</a>
-            <a href="#" className="btn secondary-btn">Download CV</a>
+            <a href="https://drive.google.com/uc?export=download&id=1hlrlZhvsy6O0gI_DEU4OTbyg4KSAx3gC" className="btn secondary-btn" target='blank' rel="noopener noreferrer">Download CV</a>
           </div>
         </div>
       </div>

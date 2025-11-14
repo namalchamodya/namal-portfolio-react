@@ -9,7 +9,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
 // --- Shader and Constant Definitions ---
-const BLACK_HOLE_RADIUS = 1.3;
+const BLACK_HOLE_RADIUS = 0.5;
 const DISK_INNER_RADIUS = BLACK_HOLE_RADIUS + 0.2;
 const DISK_OUTER_RADIUS = 8.0;
 const DISK_TILT_ANGLE = Math.PI / 3.0;
@@ -95,6 +95,48 @@ const starMaterialShader = {
             alpha *= (0.2 + vTwinkle * 0.8);
             
             gl_FragColor = vec4(vColor, alpha);
+        }
+    `
+};
+
+// Particle Shader
+const particleShader = {
+    uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.5) }
+    },
+    vertexShader: `
+        uniform float uTime;
+        uniform float uPixelRatio;
+        attribute float size;
+        attribute float speed;
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+            vColor = color;
+            
+            // Pulsating effect
+            float pulse = sin(uTime * speed + position.x + position.y + position.z) * 0.3 + 0.7;
+            vAlpha = pulse;
+            
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = size * uPixelRatio * pulse * (150.0 / -mvPosition.z);
+            gl_Position = projectionMatrix * mvPosition;
+        }
+    `,
+    fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+            float dist = distance(gl_PointCoord, vec2(0.5));
+            if (dist > 0.5) discard;
+            
+            float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+            alpha *= vAlpha;
+            
+            gl_FragColor = vec4(vColor, alpha * 0.9);
         }
     `
 };
@@ -258,9 +300,7 @@ const BlackHoleBackground = () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         
-        // --- THIS IS THE FIX ---
         renderer.outputEncoding = THREE.sRGBEncoding; 
-        // -------------------------
 
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
@@ -283,12 +323,12 @@ const BlackHoleBackground = () => {
         controls.enableDamping = true; controls.dampingFactor = 0.035;
         controls.rotateSpeed = 0.4; controls.autoRotate = autoRotate;
         controls.autoRotateSpeed = 0.1;
-        controls.target.set(0, 0, 0);
+        controls.target.set(-7.5, 0, 0);
         controls.minDistance = 2.5;
         controls.maxDistance = 100;
         controls.enablePan = false;
         controls.update();
-        controlsRef.current = controls; // Save ref for button
+        controlsRef.current = controls;
 
         // --- Mouse Listener for Parallax ---
         const mouse = new THREE.Vector2(0, 0);
@@ -326,7 +366,7 @@ const BlackHoleBackground = () => {
             const starColor = starPalette[Math.floor(Math.random() * starPalette.length)].clone();
             starColor.multiplyScalar(Math.random() * 0.7 + 0.3);
             starColors[i3] = starColor.r; starColors[i3 + 1] = starColor.g; starColors[i3 + 2] = starColor.b;
-            starSizes[i] = THREE.MathUtils.randFloat(0.6, 3.0);
+            starSizes[i] = THREE.MathUtils.randFloat(5, 3.0);
             starTwinkle[i] = Math.random() * Math.PI * 2;
         }
         starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
@@ -343,6 +383,86 @@ const BlackHoleBackground = () => {
         });
         const stars = new THREE.Points(starGeometry, starMaterial);
         scene.add(stars);
+
+        // --- 3D Particles System with Initial Positions ---
+        const particleCount = 500;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleInitialPositions = new Float32Array(particleCount * 3); // Store initial positions
+        const particleColors = new Float32Array(particleCount * 3);
+        const particleSizes = new Float32Array(particleCount);
+        const particleSpeeds = new Float32Array(particleCount);
+        
+        // ++ ADDED ++
+        const particleOrbitalSpeeds = new Float32Array(particleCount);
+        const particleOrbitOffsets = new Float32Array(particleCount);
+        
+        const particlePalette = [
+            new THREE.Color(0xfff5e6), // Very light cream
+            new THREE.Color(0xfef9ef), // Ivory
+            new THREE.Color(0xfff0f5), // Lavender blush
+            new THREE.Color(0xf0f8ff), // Alice blue
+            new THREE.Color(0xfffacd), // Lemon chiffon
+            new THREE.Color(0xfaf0e6), // Linen
+            new THREE.Color(0xfff5ee), // Seashell
+            new THREE.Color(0xf5f5f5), // White smoke
+        ];
+
+        const particleSpread = 50; // Spread in XYZ directions
+
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            
+            // Random positions in 3D space
+            const x = (Math.random() - 0.5) * particleSpread;
+            const y = (Math.random() - 0.5) * particleSpread;
+            const z = (Math.random() - 0.5) * particleSpread;
+            
+            particlePositions[i3] = x;
+            particlePositions[i3 + 1] = y;
+            particlePositions[i3 + 2] = z;
+            
+            // Store initial positions
+            particleInitialPositions[i3] = x;
+            particleInitialPositions[i3 + 1] = y;
+            particleInitialPositions[i3 + 2] = z;
+
+            const particleColor = particlePalette[Math.floor(Math.random() * particlePalette.length)].clone();
+            particleColor.multiplyScalar(Math.random() * 0.15 + 0.85); // Keep colors very bright
+            particleColors[i3] = particleColor.r;
+            particleColors[i3 + 1] = particleColor.g;
+            particleColors[i3 + 2] = particleColor.b;
+
+            // Random sizes
+            particleSizes[i] = THREE.MathUtils.randFloat(2.0, 6.0);
+            
+            // Random animation speeds
+            particleSpeeds[i] = THREE.MathUtils.randFloat(1.0, 3.0);
+            
+            // ++ ADDED ++
+            particleOrbitalSpeeds[i] = THREE.MathUtils.randFloat(0.05, 0.2); // How fast it orbits
+            particleOrbitOffsets[i] = Math.random() * Math.PI * 2; // Random start angle
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+        particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+        particleGeometry.setAttribute('speed', new THREE.BufferAttribute(particleSpeeds, 1));
+        
+        // ++ ADDED ++
+        particleGeometry.setAttribute('orbitalSpeed', new THREE.BufferAttribute(particleOrbitalSpeeds, 1));
+        particleGeometry.setAttribute('orbitOffset', new THREE.BufferAttribute(particleOrbitOffsets, 1));
+
+        const particleMaterial = new THREE.ShaderMaterial({
+            ...particleShader,
+            transparent: true,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
 
         // --- Event Horizon ---
         const eventHorizonGeom = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05, 128, 64);
@@ -372,6 +492,7 @@ const BlackHoleBackground = () => {
             blending: THREE.AdditiveBlending
         });
         const accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+        
         accretionDisk.rotation.x = DISK_TILT_ANGLE;
         accretionDisk.renderOrder = 1;
         scene.add(accretionDisk);
@@ -403,17 +524,85 @@ const BlackHoleBackground = () => {
             const elapsedTime = clock.getElapsedTime();
             const deltaTime = clock.getDelta();
 
-            // Apply mouse parallax
+            // Apply mouse parallax to camera rig
             const targetRotationX = mouse.y * 0.1;
             const targetRotationY = mouse.x * 0.1;
             cameraRig.rotation.x += (targetRotationX - cameraRig.rotation.x) * 0.05;
             cameraRig.rotation.y += (targetRotationY - cameraRig.rotation.y) * 0.05;
 
+            // ++ REPLACED PARTICLE LOGIC ++
+            
+            // Get all particle attributes
+            const positions = particleGeometry.attributes.position.array;
+            const orbitalSpeeds = particleGeometry.attributes.orbitalSpeed.array;
+            const orbitOffsets = particleGeometry.attributes.orbitOffset.array;
+            
+            // --- Calculate mouse distance from black hole (for speed) ---
+            const mouseX_01 = (mouse.x + 1) / 2; // Mouse X from 0 to 1
+            const mouseY_01 = (mouse.y + 1) / 2; // Mouse Y from 0 to 1
+            const bhPos = lensingPass.uniforms.blackHoleScreenPos.value;
+            
+            // Calculate distance, correcting for screen aspect ratio
+            const dx = (mouseX_01 - bhPos.x) * camera.aspect;
+            const dy = mouseY_01 - bhPos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // --- Map distance to follow-speed ---
+            const minLerp = 0.005; // Very slow when close
+            const maxLerp = 0.08;  // Faster when far
+            const proximityThreshold = 0.4; // How "far" is far (in screen space)
+            
+            // speedFactor is 0.0 when close, 1.0 when far
+            const speedFactor = THREE.MathUtils.smoothstep(dist, 0.05, proximityThreshold);
+            // lerpFactor is the final interpolation speed
+            const lerpFactor = THREE.MathUtils.lerp(minLerp, maxLerp, speedFactor);
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                
+                // --- 1. Calculate Base Orbital Position ---
+                const orbitalSpeed = orbitalSpeeds[i];
+                const orbitOffset = orbitOffsets[i];
+                const angle = orbitalSpeed * elapsedTime + orbitOffset;
+                const cosA = Math.cos(angle);
+                const sinA = Math.sin(angle);
+
+                const ix = particleInitialPositions[i3];
+                const iy = particleInitialPositions[i3 + 1];
+                const iz = particleInitialPositions[i3 + 2];
+
+                // Rotate the initial position around the Y-axis
+                const orbitedX = ix * cosA + iz * sinA;
+                const orbitedY = iy;
+                const orbitedZ = -ix * sinA + iz * cosA;
+
+                // --- 2. Calculate Mouse Parallax Offset ---
+                // Use initial Z (iz) for a consistent depth effect
+                const depthFactor = (iz + particleSpread / 2) / particleSpread; // 0 to 1
+                const movementScale = 15 * depthFactor;
+                
+                const offsetX = mouse.x * movementScale;
+                const offsetY = mouse.y * movementScale;
+                
+                // --- 3. Define Final Target Position ---
+                const targetX = orbitedX + offsetX;
+                const targetY = orbitedY + offsetY;
+                const targetZ = orbitedZ; // Z position is controlled by orbit
+
+                // --- 4. Interpolate to Target using new lerpFactor ---
+                positions[i3] += (targetX - positions[i3]) * lerpFactor;
+                positions[i3 + 1] += (targetY - positions[i3 + 1]) * lerpFactor;
+                positions[i3 + 2] += (targetZ - positions[i3 + 2]) * lerpFactor;
+            }
+            particleGeometry.attributes.position.needsUpdate = true;
+            // ++ END OF REPLACEMENT ++
+
             // Update uniforms
             diskMaterial.uniforms.uTime.value = elapsedTime;
             starMaterial.uniforms.uTime.value = elapsedTime;
+            particleMaterial.uniforms.uTime.value = elapsedTime;
             eventHorizonMat.uniforms.uTime.value = elapsedTime;
-            // Get the camera's world position for the fresnel shader
+            
             const cameraWorldPos = new THREE.Vector3();
             camera.getWorldPosition(cameraWorldPos);
             eventHorizonMat.uniforms.uCameraPosition.value.copy(cameraWorldPos);
@@ -452,7 +641,6 @@ const BlackHoleBackground = () => {
                     if (Array.isArray(object.material)) {
                         object.material.forEach(material => material.dispose());
                     } else {
-                        // Check for dispose method on material
                         if (typeof object.material.dispose === 'function') {
                             object.material.dispose();
                         }
@@ -461,6 +649,8 @@ const BlackHoleBackground = () => {
             });
             starGeometry.dispose();
             starMaterial.dispose();
+            particleGeometry.dispose();
+            particleMaterial.dispose();
             eventHorizonGeom.dispose();
             eventHorizonMat.dispose();
             blackHoleGeom.dispose();
@@ -474,7 +664,7 @@ const BlackHoleBackground = () => {
             renderer.dispose();
             controls.dispose();
         };
-    }, [autoRotate]); // Re-run effect if autoRotate changes to update controls
+    }, [autoRotate]);
 
     // --- UI Button Handler ---
     const handleToggleAutoRotate = () => {
@@ -491,18 +681,16 @@ const BlackHoleBackground = () => {
             position: 'absolute', 
             top: 0, 
             left: 0, 
-            width: '100vw', // Use vw/vh for full viewport
+            width: '100vw',
             height: '100vh', 
             zIndex: -1, 
-            overflow: 'hidden', // Prevent scrollbars
-            background: 'radial-gradient(ellipse at center, #1e1e1e 0%, #1e1e1e 70%)', // Add background here
-            fontFamily: "'Inter', sans-serif", // Ensure font is loaded
-            color: '#e0e0ff' // Default text color
+            overflow: 'hidden',
+            background: 'radial-gradient(ellipse at center, #1e1e1e 0%, #1e1e1e 70%)',
+            fontFamily: "'Inter', sans-serif",
+            color: '#e0e0ff'
         }}>
-            {/* The Three.js canvas will be injected here */}
             <div ref={mountRef} />
             
-            {/* UI Elements */}
             <div id="info" style={{ 
                 position: 'absolute',
                 top: '20px',
@@ -520,7 +708,6 @@ const BlackHoleBackground = () => {
             </div>
             
             <div id="controls" className="ui-panel" style={{
-                /* Base styles are in style.css, this component manages its own position */
                 position: 'absolute',
                 bottom: '20px',
                 right: '20px',
@@ -536,7 +723,6 @@ const BlackHoleBackground = () => {
                     fontSize: 'inherit', 
                     transition: 'color 0.2s ease'
                 }}>
-
                 </div>
             </div>
         </div>
