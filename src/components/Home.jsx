@@ -1,10 +1,10 @@
 import React from 'react';
-import BackgroundCanvas from './BackgroundCanvas';
-
+import BlackHoleBackground from './BlackHoleBackground/BlackHoleBackground';
 const Home = () => {
   return (
     <section id="home" className="section">
-      <BackgroundCanvas />
+      <BlackHoleBackground />
+      
       <div className="home-content fade-in">
         <div className="text-reveal">
           <h1>

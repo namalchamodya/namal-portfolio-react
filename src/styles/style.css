@@ -33,6 +33,11 @@ body {
   overflow-x: hidden;
   line-height: 1.6;
   position: relative;
+  cursor: none;
+}
+
+body, html {
+  cursor: none;
 }
 
 /* Custom Scrollbar */
@@ -234,6 +239,36 @@ img {
   opacity: 0.5;
 }
 
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: background 0.2s, transform 0.1s;
+  mix-blend-mode: difference;
+}
+
+.cursor-follower {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: background 0.3s, transform 0.15s;
+  mix-blend-mode: difference;
+}
+
 /* Navigation */
 nav {
   position: fixed;
@@ -409,7 +444,7 @@ nav.scrolled {
 
 .scroll-indicator {
   position: absolute;
-  bottom: 50px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;

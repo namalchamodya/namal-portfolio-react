@@ -10,8 +10,7 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import { setupGSAP } from './utils/gsapSetup';
 
-// 👇 Import the black hole background
-import BlackHoleBackground from './components/BlackHoleBackground';
+import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
 import './styles/blackhole.css';
 
 function App() {
