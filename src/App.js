@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Loader from './components/Loader';
 import Cursor from './components/Cursor';
@@ -12,6 +13,7 @@ import { setupGSAP } from './utils/gsapSetup';
 
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
 import './styles/blackhole.css';
+import './styles/style.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -46,3 +48,5 @@ function App() {
 }
 
 export default App;
+
+
