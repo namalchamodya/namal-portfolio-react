@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/namal-portfolio-react/static/css/main.f05b501a.css",
-    "main.js": "/namal-portfolio-react/static/js/main.be830f54.js",
+    "main.js": "/namal-portfolio-react/static/js/main.441b1bd1.js",
     "index.html": "/namal-portfolio-react/index.html",
     "main.f05b501a.css.map": "/namal-portfolio-react/static/css/main.f05b501a.css.map",
-    "main.be830f54.js.map": "/namal-portfolio-react/static/js/main.be830f54.js.map"
+    "main.441b1bd1.js.map": "/namal-portfolio-react/static/js/main.441b1bd1.js.map"
   },
   "entrypoints": [
     "static/css/main.f05b501a.css",
-    "static/js/main.be830f54.js"
+    "static/js/main.441b1bd1.js"
   ]
 }
