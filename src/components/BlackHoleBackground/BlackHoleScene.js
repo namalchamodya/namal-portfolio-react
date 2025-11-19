@@ -125,7 +125,7 @@ export class BlackHoleScene {
         this.scene.add(this.stars);
 
         // --- 3D Particles System ---
-        const particleCount = 500;
+        const particleCount = 100;
         this.particleGeometry = new THREE.BufferGeometry();
         const particlePositions = new Float32Array(particleCount * 3);
         this.particleInitialPositions = new Float32Array(particleCount * 3); // Store initial

@@ -211,64 +211,78 @@ img {
   visibility: hidden;
   opacity: 0;
 }
-
 /* Custom Cursor */
-.cursor {
-  position: fixed;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  z-index: 9999;
-  transition: transform 0.1s ease;
-  mix-blend-mode: difference;
-}
-
-.cursor-follower {
-  position: fixed;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--primary-color);
-  border-radius: 50%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
-  z-index: 9998;
-  opacity: 0.5;
-}
-
-.cursor {
+.rocket-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  border-radius: 50%;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 10000;
   transform: translate(-50%, -50%);
-  transition: background 0.2s, transform 0.1s;
-  mix-blend-mode: difference;
+  transition: transform 0.1s ease-out;
 }
 
-.cursor-follower {
+.rocket-cursor svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.rocket-cursor.hover {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.rocket-cursor.hover svg {
+  transform: rotate(-45deg) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(255, 193, 7, 0.4));
+}
+
+.rocket-cursor.click svg {
+  transform: rotate(-45deg) scale(0.9);
+}
+
+/* Hide default cursor when rocket cursor is active */
+* {
+  cursor: none !important;
+}
+
+/* Add smooth color transition for SVG elements */
+.rocket-cursor svg path,
+.rocket-cursor svg circle {
+  transition: fill 0.2s ease;
+}
+
+/* --- NEW STYLES FOR THE TRAIL --- */
+
+.rocket-trail {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 32px;
-  height: 32px;
-  background: rgba(255,255,255,0.15);
+  /* Must be less than the rocket's z-index (10000) */
+  z-index: 9999;
+  width: 10px;
+  height: 10px;
+  background: white;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 9998;
+  /* Center the particle on the cursor offset */
   transform: translate(-50%, -50%);
-  transition: background 0.3s, transform 0.15s;
-  mix-blend-mode: difference;
+  /* Run the animation */
+  animation: fadeOut 3s forwards;
 }
 
+@keyframes fadeOut {
+  from {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+    filter: blur(10px);
+  }
+}
 /* Navigation */
 nav {
   position: fixed;
@@ -544,22 +558,39 @@ nav.scrolled {
 }
 
 /* Projects Section */
+/* Projects Section Layout */
 .projects-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 40px;
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .projects-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Project Card Styles */
 .project-item {
   display: flex;
   flex-direction: column;
+  opacity: 0;
+  transform: translateY(50px);
   border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease;
+  background-color: var(--light-bg); /* Ensure card has a background */
+}
+
+.project-item.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .project-item:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -575,19 +606,14 @@ nav.scrolled {
   height: 250px;
   object-fit: cover;
   transition: transform 0.5s ease;
+  display: block;
 }
 
 .project-item:hover .project-image img {
   transform: scale(1.05);
 }
 
-.project-item.reverse .project-image {
-  order: 2;
-}
-.project-item.reverse .project-info {
-  order: 1;
-}
-
+/* Overlay Styles */
 .project-overlay {
   position: absolute;
   top: 0;
@@ -612,6 +638,11 @@ nav.scrolled {
   letter-spacing: 2px;
   border: 2px solid var(--primary-color);
   padding: 10px 20px;
+  cursor: pointer;
+}
+
+.project-info {
+  padding: 20px;
 }
 
 .project-info h3 {
@@ -626,7 +657,8 @@ nav.scrolled {
 }
 
 .project-tags span {
-  background-color: var(--light-bg);
+  background-color: var(--light-bg); /* Or use a specific color variable */
+  border: 1px solid var(--primary-color);
   color: var(--primary-color);
   padding: 5px 15px;
   border-radius: 20px;
@@ -637,6 +669,27 @@ nav.scrolled {
 .section-cta {
   text-align: center;
   margin-top: 80px;
+}
+
+/* --- IMPORTANT: ANIMATION CODE --- */
+
+/* 1. Define the movement (Start lower and invisible, move up and become visible) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 2. Apply the animation class */
+.project-item.fade-in {
+  opacity: 0; /* Hide initially */
+  /* The animation duration is 0.6s. 'forwards' ensures it stays visible at the end. */
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 
 /* Skills Section */
@@ -708,8 +761,9 @@ nav.scrolled {
 .skill-progress {
   height: 100%;
   background-color: var(--primary-color);
-  width: 0;
-  transition: width 1.5s ease;
+  width: 0; 
+  border-radius: 3px;
+  transition: width 1.5s ease-out;
 }
 
 /* Contact Section */

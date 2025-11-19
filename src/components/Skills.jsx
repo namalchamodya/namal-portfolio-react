@@ -1,8 +1,36 @@
-import React from 'react';
-import useSkillProgress from '../hooks/useSkillProgress';
+import React, { useEffect } from 'react';
 
 const Skills = () => {
-  useSkillProgress();
+  
+  useEffect(() => {
+    // 1. Setup the observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        // Check if the skill item is visible on screen
+        if (entry.isIntersecting) {
+          // Find the progress bar inside this item
+          const progressBar = entry.target.querySelector('.skill-progress');
+          
+          if (progressBar) {
+            // Read the target percentage (e.g., "80")
+            const targetWidth = progressBar.getAttribute('data-progress');
+            // Apply the width to trigger the CSS transition
+            progressBar.style.width = `${targetWidth}%`;
+          }
+          
+          // Stop watching this item so it doesn't animate again when you scroll up/down
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 }); // Trigger when 10% of the item is visible
+
+    // 2. Target all skill items
+    const skillItems = document.querySelectorAll('.skill-item');
+    skillItems.forEach((item) => observer.observe(item));
+
+    // 3. Cleanup on unmount
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id="skills" className="section">
@@ -13,6 +41,7 @@ const Skills = () => {
 
       <div className="skills-container">
 
+        {/* --- DEVELOPMENT --- */}
         <div className="skill-category">
           <h3>DEVELOPMENT</h3>
           <div className="skills-grid">
@@ -58,6 +87,7 @@ const Skills = () => {
           </div>
         </div>
 
+        {/* --- DESIGN --- */}
         <div className="skill-category">
           <h3>DESIGN</h3>
           <div className="skills-grid">
@@ -103,6 +133,7 @@ const Skills = () => {
           </div>
         </div>
 
+        {/* --- TOOLS & TECHNOLOGIES --- */}
         <div className="skill-category">
           <h3>TOOLS & TECHNOLOGIES</h3>
           <div className="skills-grid">
