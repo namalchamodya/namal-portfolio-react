@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/namal-portfolio-react/static/css/main.f05b501a.css",
+    "main.js": "/namal-portfolio-react/static/js/main.53ffc6fd.js",
+    "index.html": "/namal-portfolio-react/index.html",
+    "main.f05b501a.css.map": "/namal-portfolio-react/static/css/main.f05b501a.css.map",
+    "main.53ffc6fd.js.map": "/namal-portfolio-react/static/js/main.53ffc6fd.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f05b501a.css",
+    "static/js/main.53ffc6fd.js"
+  ]
+}
