@@ -18,3 +18,4 @@ Put your images (dp3.png, campus.jpg, projece2.png) in `public/`.
 - GSAP animations are initialized in `src/utils/gsapSetup.js`.
 - The 3D background is a simple torus knot for visual motion; tweak geometry/material for your vibe.
 
+![This is the alt text](public/screencapture-file-D-Courses-web-port3-index-html-2025-11-13-00_19_39.png)
