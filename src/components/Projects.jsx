@@ -1,13 +1,61 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const projects = [
-  { id: 1, title: 'Nova-med website', description: 'Interactive 3D visualization of audio frequencies using WebGL and Three.js', image: '/nova_med.png', alt: 'Nova-med web screenshot', href: '#', tags: ['Three.js', 'WebGL', 'JavaScript', 'Web Audio API'] },
-  { id: 2, title: 'University Website', description: 'A modern UI component library inspired by neomorphism design principles', image: '/projece2.png', alt: 'University Website preview', href: 'https://github.com/namalchamodya/University-web', tags: ['React', 'SCSS', 'Storybook', 'Figma'] },
-  { id: 3, title: 'Namal-Chamodya web', description: 'Dynamic portfolio builder with drag & drop sections', image: '/namal_chamodya_web.png', alt: 'Portfolio Builder preview', href: '#', tags: ['React', 'DnD', 'CSS'] },
-  { id: 4, title: '3D Projects', description: 'Collection of interactive 3D models',image: '/3d-product.png', alt: '3D Projects preview', href: '#threeD-section',tags: ['React', 'Three.js', 'GLTF'] },
-  
-  { id: 5, title: 'Chart Dashboard', description: 'Data visualization dashboard with interactive charts', image: '/charts.png', alt: 'Chart Dashboard preview', href: '#', tags: ['React', 'Recharts'] },
-  { id: 6, title: 'Auth Starter', description: 'Starter kit with JWT auth flow', image: '/auth.png', alt: 'Auth Starter preview', href: '#', tags: ['Node', 'Express', 'JWT'] },
+  { 
+    id: 1, 
+    title: 'Nova-med website', 
+    description: 'Interactive 3D visualization', 
+    image: process.env.PUBLIC_URL + '/nova_med.png', 
+    alt: 'Nova-med', 
+    href: '#', 
+    tags: ['Three.js', 'WebGL', 'React'] 
+  },
+  { 
+    id: 2, 
+    title: 'University Website', 
+    description: 'Modern responsive university website', 
+    image: process.env.PUBLIC_URL + '/projece2.png', 
+    alt: 'University Web', 
+    href: 'https://github.com/namalchamodya/University-web', 
+    tags: ['React', 'CSS'] 
+  },
+  { 
+    id: 3, 
+    title: 'Namal-Chamodya web', 
+    description: 'Dynamic portfolio builder', 
+    image: process.env.PUBLIC_URL + '/namal_chamodya_web.png', 
+    alt: 'Portfolio', 
+    href: '#', 
+    tags: ['React', 'DnD', 'Three.js'] 
+  },
+  { 
+    id: 4, 
+    title: '3D Projects Gallery', 
+    description: 'Click to view my collection of 3D models',
+    image: process.env.PUBLIC_URL + '/3d-product.png', 
+    alt: '3D Projects', 
+    href: '/3d-projects',
+    tags: ['Blender', 'SolidWorks', 'Three.js'] 
+  },
+  { 
+    id: 5, 
+    title: 'Electronics Projects', 
+    description: 'IoT device prototypes', 
+    image: process.env.PUBLIC_URL + '/electronics.png', 
+    alt: 'Electronics', 
+    href: '#', 
+    tags: ['ESP32', 'IoT'] 
+  },
+  { 
+    id: 6, 
+    title: 'Digital Art Gallery', 
+    description: 'Pencil portraits and digital illustrations', 
+    image: process.env.PUBLIC_URL + '/art.png', 
+    alt: 'Digital Art', 
+    href: '#', 
+    tags: ['Photoshop', 'Clip Studio', 'Drawing'] 
+  },
 ];
 
 const INITIAL_COUNT = 4;
@@ -18,32 +66,20 @@ const Projects = () => {
   const hasMore = visibleCount < projects.length;
 
   useEffect(() => {
-    // 1. Create the observer
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          // Add the 'visible' class when the item enters the screen
           entry.target.classList.add('visible');
-          // Stop observing once animated
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 }); // Trigger when 10% of the item is visible
+    }, { threshold: 0.1 });
 
-    // 2. Observe all project items
     const items = document.querySelectorAll('.project-item');
     items.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
-  }, [visibleProjects]); // Re-run this when "Load More" is clicked
-
-  const loadMore = () => {
-    setVisibleCount((c) => Math.min(c + INITIAL_COUNT, projects.length));
-  };
-
-  const showLess = () => {
-    setVisibleCount(INITIAL_COUNT);
-  };
+  }, [visibleProjects]);
 
   return (
     <section id="projects" className="section">
@@ -53,46 +89,47 @@ const Projects = () => {
       </div>
 
       <div className="projects-container">
-        {visibleProjects.map((project, index) => (
-          <div 
-            className="project-item" // Removed 'fade-in', logic is now handled by observer
-            key={project.id}
-            // This delay ensures they pop in one by one (0s, 0.2s, 0.4s...)
-            style={{ transitionDelay: `${(index % INITIAL_COUNT) * 0.2}s` }}
-          >
-            <div className="project-image">
-              <img src={project.image} alt={project.alt} />
-              <div className="project-overlay">
-                <div className="overlay-content">
-                  <a href={project.href} target="_blank" rel="noopener noreferrer">
-                    <h4>VIEW PROJECT</h4>
-                  </a>
+        {visibleProjects.map((project, index) => {
+          // Check if link is internal (starts with /)
+          const isInternal = project.href.startsWith('/');
+          return (
+            <div 
+              className="project-item"
+              key={project.id}
+              style={{ transitionDelay: `${(index % INITIAL_COUNT) * 0.2}s` }}
+            >
+              <div className="project-image">
+                <img src={project.image} alt={project.alt} />
+                <div className="project-overlay">
+                  <div className="overlay-content">
+                    {isInternal ? (
+                      <Link to={project.href}><h4>OPEN GALLERY</h4></Link>
+                    ) : (
+                      <a href={project.href} target="_blank" rel="noopener noreferrer">
+                        <h4>VIEW PROJECT</h4>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="project-info">
+                <h3>{project.title}</h3>
+                <p>{project.description}</p>
+                <div className="project-tags">
+                  {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
                 </div>
               </div>
             </div>
-            <div className="project-info">
-              <h3>{project.title}</h3>
-              <p>{project.description}</p>
-              <div className="project-tags">
-                {project.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-
+      
       <div className="section-cta">
         {hasMore ? (
-          <button className="btn primary-btn" onClick={loadMore}>
-            More Projects
-          </button>
-        ) : visibleCount > INITIAL_COUNT ? (
-          <button className="btn primary-btn" onClick={showLess}>
-            Show Less
-          </button>
-        ) : null}
+            <button className="btn primary-btn" onClick={() => setVisibleCount(c => c + 4)}>More Projects</button>
+        ) : visibleCount > INITIAL_COUNT && (
+            <button className="btn primary-btn" onClick={() => setVisibleCount(INITIAL_COUNT)}>Show Less</button>
+        )}
       </div>
     </section>
   );

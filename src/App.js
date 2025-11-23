@@ -1,46 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Loader from './components/Loader';
 import Cursor from './components/Cursor';
-import Home from './components/Home';
-import About from './components/About';
-import Projects from './components/Projects';
-import Skills from './components/Skills';
-import Contact from './components/Contact';
 import Footer from './components/Footer';
-import { setupGSAP } from './utils/gsapSetup';
 
+// Import Pages
+import MainContent from './components/MainContent';
+import ThreeDGallery from './components/ThreeD/ThreeDGallery';
+
+// Styles & Scripts
+import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
 import './styles/blackhole.css';
 import './styles/style.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
-    // Simulate loader; you can remove delay or hook to actual asset loading
+    // 1. Loader Logic (runs once)
     const t = setTimeout(() => setLoading(false), 1200);
-    setupGSAP();
-    return () => clearTimeout(t);
-  }, []);
+
+    // 2. GSAP Animation Setup
+    // We wrap this in a small timeout to ensure the DOM elements 
+    // (like Home, About) are fully rendered before we try to animate them.
+    const animationTimer = setTimeout(() => {
+      setupGSAP();
+      // Force scroll to top on route change to ensure triggers work
+      window.scrollTo(0, 0);
+    }, 100);
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(animationTimer);
+    };
+  }, [location.pathname]); // 👈 CRITICAL FIX: Re-run when path changes
 
   return (
     <>
-      {/* 👇 Render background first so it sits behind everything */}
+      {/* Persistent Background */}
       <BlackHoleBackground />
 
       {loading && <Loader />}
       <Cursor />
-      <Navbar />
 
-      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-        <Home />
-        <About />
-        <Projects />
-        <Skills />
-        <Contact />
-      </div>
+      <Routes>
+        {/* Main Portfolio Page */}
+        <Route path="/" element={<MainContent />} />
+        
+        {/* New 3D Gallery Page */}
+        <Route path="/3d-projects" element={<ThreeDGallery />} />
+      </Routes>
 
       <Footer />
     </>
@@ -48,5 +59,3 @@ function App() {
 }
 
 export default App;
-
-

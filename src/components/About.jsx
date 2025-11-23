@@ -11,7 +11,7 @@ const About = () => {
       <div className="about-container">
         <div className="about-image scale-in">
           <div className="image-container">
-            <img src="/dp3.png" alt="Namal Chamodya" />
+            <img src={process.env.PUBLIC_URL + "/dp3.png"} alt="Namal Chamodya" />
             <div className="accent-circle"></div>
           </div>
         </div>

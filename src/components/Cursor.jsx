@@ -4,11 +4,10 @@ const Cursor = () => {
   const rocketRef = useRef(null);
   const [isMoving, setIsMoving] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isHidden, setIsHidden] = useState(false); // New state to hide cursor
   const timeoutRef = useRef(null);
   
-  // State to hold the trail particles
   const [trail, setTrail] = useState([]);
-  // Ref to throttle particle creation for performance
   const lastParticleTime = useRef(0);
 
   useEffect(() => {
@@ -16,10 +15,10 @@ const Cursor = () => {
 
     const move = (e) => {
       const { clientX, clientY } = e;
-      // Move the rocket
-      rocket.style.transform = `translate(${clientX}px, ${clientY}px)`;
+      if (rocket) {
+        rocket.style.transform = `translate(${clientX}px, ${clientY}px)`;
+      }
       
-      // Handle thrust animation
       setIsMoving(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -28,36 +27,36 @@ const Cursor = () => {
         setIsMoving(false);
       }, 100);
 
-      // --- TRAIL LOGIC WITH OFFSET ---
-      const now = Date.now();
-      // Throttle particle creation to max one every 30ms
-      if (now - lastParticleTime.current > 30) {
-        lastParticleTime.current = now;
-        
-        // Calculate offset for the thrust
-        // (due to -45deg rotation on a 24px body)
-        const thrustOffsetX = 15; 
-        const thrustOffsetY = 15;
-
-        const newParticle = { 
-          id: now, 
-          x: clientX + thrustOffsetX, 
-          y: clientY + thrustOffsetY 
-        };
-        
-        // Add new particle to the state
-        setTrail(prevTrail => [...prevTrail, newParticle]);
-        
-        // Set timer to remove the particle after 500ms (matches CSS animation)
-        setTimeout(() => {
-          setTrail(prev => prev.filter(p => p.id !== newParticle.id));
-        }, 500); // This is the lifespan of the particle
+      // --- TRAIL LOGIC ---
+      // Only generate trail if cursor is NOT hidden
+      if (!isHidden) {
+        const now = Date.now();
+        if (now - lastParticleTime.current > 30) {
+          lastParticleTime.current = now;
+          const thrustOffsetX = 15; 
+          const thrustOffsetY = 15;
+          const newParticle = { 
+            id: now, 
+            x: clientX + thrustOffsetX, 
+            y: clientY + thrustOffsetY 
+          };
+          setTrail(prevTrail => [...prevTrail, newParticle]);
+          setTimeout(() => {
+            setTrail(prev => prev.filter(p => p.id !== newParticle.id));
+          }, 500);
+        }
       }
-      // --- END TRAIL LOGIC ---
     };
 
     const handleMouseOver = (e) => {
       const target = e.target;
+      
+      // 1. CHECK IF WE SHOULD HIDE CURSOR (For 3D Models)
+      // If we are over the .model-wrapper class or a model-viewer tag
+      const is3DModel = target.closest('.model-wrapper') || target.tagName === 'MODEL-VIEWER';
+      setIsHidden(!!is3DModel);
+
+      // 2. CHECK IF CLICKABLE
       const isClickable = target.matches('a, button, .btn, [role="button"], input[type="submit"], input[type="button"], .clickable, .project-item, .skill-item, .nav-links a, .social-icons a');
       setIsHovering(isClickable);
     };
@@ -68,6 +67,7 @@ const Cursor = () => {
       if (isClickable) {
         setIsHovering(false);
       }
+      // Note: We don't reset isHidden here because mouseOver handles the entering of new elements
     };
 
     window.addEventListener('mousemove', move);
@@ -82,15 +82,18 @@ const Cursor = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []); // Empty dependency array is correct
+  }, [isHidden]); // Add isHidden as dependency if needed, though ref usage avoids it usually.
 
   return (
     <>
-      {/* 1. The Rocket Cursor */}
-      <div className={`rocket-cursor ${isHovering ? 'hover' : ''}`} ref={rocketRef}>
+      {/* 1. The Rocket Cursor - Opacity becomes 0 if isHidden is true */}
+      <div 
+        className={`rocket-cursor ${isHovering ? 'hover' : ''}`} 
+        ref={rocketRef}
+        style={{ opacity: isHidden ? 0 : 1 }}
+      >
         <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           {isHovering ? (
-            // Pointer cursor design
             <>
               <path d="M12 2L20 20H4L12 2Z" fill="#FFC107"/>
               <path d="M12 4L18 18H6L12 4Z" fill="#004E98"/>
@@ -98,15 +101,13 @@ const Cursor = () => {
               <path d="M10 20L12 24L14 20" fill="#FF4500" opacity="0.8"/>
             </>
           ) : (
-            // Default rocket design
             <>
               <path d="M12 2L15 9H9L12 2Z" fill="#FF6B35"/>
               <path d="M9 9H15V15H9V9Z" fill="#004E98"/>
               <path d="M10 15V18L12 16L14 18V15H10Z" fill="#FF6B35"/>
               <circle cx="11" cy="11" r="1" fill="#FFE66D"/>
               <circle cx="13" cy="13" r="1" fill="#FFE66D"/>
-              {/* Thrust fire */}
-              {isMoving && (
+              {isMoving && !isHidden && (
                 <g className="thrust-fire">
                   <path d="M10 18L12 24L14 18" fill="#FF4500" opacity="0.8"/>
                   <path d="M10.5 18L12 22L13.5 18" fill="#FFD700" opacity="0.9"/>
@@ -118,8 +119,8 @@ const Cursor = () => {
         </svg>
       </div>
 
-      {/* 2. The Trail Particles */}
-      {trail.map(p => (
+      {/* 2. The Trail Particles - Only show if not hidden */}
+      {!isHidden && trail.map(p => (
         <div
           key={p.id}
           className="rocket-trail"

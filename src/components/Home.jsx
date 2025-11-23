@@ -1,9 +1,9 @@
 import React from 'react';
-import BlackHoleBackground from './BlackHoleBackground/BlackHoleBackground';
+
 const Home = () => {
   return (
     <section id="home" className="section">
-      <BlackHoleBackground />
+      {/* Background is now in App.js */}
       
       <div className="home-content fade-in">
         <div className="text-reveal">
