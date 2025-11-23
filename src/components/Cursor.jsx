@@ -4,13 +4,32 @@ const Cursor = () => {
   const rocketRef = useRef(null);
   const [isMoving, setIsMoving] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [isHidden, setIsHidden] = useState(false); // New state to hide cursor
-  const timeoutRef = useRef(null);
+  const [isHidden, setIsHidden] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // New state for mobile detection
   
+  const timeoutRef = useRef(null);
   const [trail, setTrail] = useState([]);
   const lastParticleTime = useRef(0);
 
+  // 1. Mobile Detection (Run once on mount)
   useEffect(() => {
+    const checkMobile = () => {
+      // Check for small screen (standard mobile breakpoint) OR touch capability
+      const mobile = window.matchMedia("(max-width: 768px)").matches || 
+                     'ontouchstart' in window || 
+                     navigator.maxTouchPoints > 0;
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 2. Mouse Logic
+  useEffect(() => {
+    if (isMobile) return; // Skip logic if on mobile
+
     const rocket = rocketRef.current;
 
     const move = (e) => {
@@ -28,7 +47,6 @@ const Cursor = () => {
       }, 100);
 
       // --- TRAIL LOGIC ---
-      // Only generate trail if cursor is NOT hidden
       if (!isHidden) {
         const now = Date.now();
         if (now - lastParticleTime.current > 30) {
@@ -51,12 +69,11 @@ const Cursor = () => {
     const handleMouseOver = (e) => {
       const target = e.target;
       
-      // 1. CHECK IF WE SHOULD HIDE CURSOR (For 3D Models)
-      // If we are over the .model-wrapper class or a model-viewer tag
+      // Check for 3D model to hide cursor
       const is3DModel = target.closest('.model-wrapper') || target.tagName === 'MODEL-VIEWER';
       setIsHidden(!!is3DModel);
 
-      // 2. CHECK IF CLICKABLE
+      // Check for clickable elements
       const isClickable = target.matches('a, button, .btn, [role="button"], input[type="submit"], input[type="button"], .clickable, .project-item, .skill-item, .nav-links a, .social-icons a');
       setIsHovering(isClickable);
     };
@@ -67,7 +84,6 @@ const Cursor = () => {
       if (isClickable) {
         setIsHovering(false);
       }
-      // Note: We don't reset isHidden here because mouseOver handles the entering of new elements
     };
 
     window.addEventListener('mousemove', move);
@@ -82,11 +98,14 @@ const Cursor = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isHidden]); // Add isHidden as dependency if needed, though ref usage avoids it usually.
+  }, [isHidden, isMobile]);
+
+  // If mobile, DO NOT render the custom cursor
+  if (isMobile) return null;
 
   return (
     <>
-      {/* 1. The Rocket Cursor - Opacity becomes 0 if isHidden is true */}
+      {/* Main Rocket Cursor */}
       <div 
         className={`rocket-cursor ${isHovering ? 'hover' : ''}`} 
         ref={rocketRef}
@@ -119,7 +138,7 @@ const Cursor = () => {
         </svg>
       </div>
 
-      {/* 2. The Trail Particles - Only show if not hidden */}
+      {/* Trail Particles */}
       {!isHidden && trail.map(p => (
         <div
           key={p.id}

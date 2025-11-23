@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 const projects = [
   { 
     id: 1, 
-    title: 'Nova-med website', 
-    description: 'Interactive 3D visualization', 
-    image: process.env.PUBLIC_URL + '/nova_med.png', 
-    alt: 'Nova-med', 
+    title: 'Digital Art Gallery', 
+    description: 'Pencil portraits and digital illustrations', 
+    image: process.env.PUBLIC_URL + '/art.png', 
+    alt: 'Digital Art', 
     href: '#', 
-    tags: ['Three.js', 'WebGL', 'React'] 
+    tags: ['Photoshop', 'Clip Studio', 'Drawing'] 
   },
   { 
     id: 2, 
@@ -49,12 +49,21 @@ const projects = [
   },
   { 
     id: 6, 
-    title: 'Digital Art Gallery', 
-    description: 'Pencil portraits and digital illustrations', 
-    image: process.env.PUBLIC_URL + '/art.png', 
-    alt: 'Digital Art', 
+    title: 'Nova-med website', 
+    description: 'Interactive 3D visualization', 
+    image: process.env.PUBLIC_URL + '/nova_med.png', 
+    alt: 'Nova-med', 
     href: '#', 
-    tags: ['Photoshop', 'Clip Studio', 'Drawing'] 
+    tags: ['Three.js', 'WebGL', 'React'] 
+  },
+  { 
+    id: 7, 
+    title: 'LabelStudio', 
+    description: 'Generate custom QR codes with various options', 
+    image: process.env.PUBLIC_URL + '/labelstudio.png', 
+    alt: 'QR Code Generator', 
+    href: 'https://labelstudio.netlify.app/', 
+    tags: ['React', 'QR Code', 'Web App'] 
   },
 ];
 
