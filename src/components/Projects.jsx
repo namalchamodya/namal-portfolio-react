@@ -4,21 +4,22 @@ import { Link } from 'react-router-dom';
 const projects = [
   { 
     id: 1, 
-    title: 'Digital Art Gallery', 
-    description: 'Pencil portraits and digital illustrations', 
+    title: 'Art & Design Portfolio', 
+    description: 'Creative artwork using Photoshop, Clip Studio Paint, and traditional pencil drawing', 
     image: process.env.PUBLIC_URL + '/art.png', 
-    alt: 'Digital Art', 
-    href: '#', 
-    tags: ['Photoshop', 'Clip Studio', 'Drawing'] 
+    alt: 'Art Portfolio', 
+    href: '/art-portfolio', 
+    tags: ['Photoshop', 'Clip Studio Paint', 'Pencil Drawing'] 
   },
+
   { 
     id: 2, 
     title: 'University Website', 
-    description: 'Modern responsive university website', 
+    description: 'Modern UI component library', 
     image: process.env.PUBLIC_URL + '/projece2.png', 
     alt: 'University Web', 
     href: 'https://github.com/namalchamodya/University-web', 
-    tags: ['React', 'CSS'] 
+    tags: ['React', 'SCSS'] 
   },
   { 
     id: 3, 
@@ -27,16 +28,16 @@ const projects = [
     image: process.env.PUBLIC_URL + '/namal_chamodya_web.png', 
     alt: 'Portfolio', 
     href: '#', 
-    tags: ['React', 'DnD', 'Three.js'] 
+    tags: ['React', 'DnD'] 
   },
   { 
     id: 4, 
     title: '3D Projects Gallery', 
-    description: 'Click to view my collection of 3D models',
+    description: 'Collection of interactive 3D models',
     image: process.env.PUBLIC_URL + '/3d-product.png', 
     alt: '3D Projects', 
-    href: '/3d-projects',
-    tags: ['Blender', 'SolidWorks', 'Three.js'] 
+    href: '/3d-projects', // 👈 LINKS TO NEW PAGE
+    tags: ['React', '3D Model', 'GLTF'] 
   },
   { 
     id: 5, 
@@ -49,22 +50,23 @@ const projects = [
   },
   { 
     id: 6, 
+    title: 'LabelStudio', 
+    description: 'QR code and label generation app', 
+    image: process.env.PUBLIC_URL + '/labelstudio.png', 
+    alt: 'LabelStudio', 
+    href: 'https://labelstudio.netlify.app/', 
+    tags: ['React', 'QR Code', 'Labels'] 
+  },
+  { 
+    id: 7, 
     title: 'Nova-med website', 
     description: 'Interactive 3D visualization', 
     image: process.env.PUBLIC_URL + '/nova_med.png', 
     alt: 'Nova-med', 
     href: '#', 
-    tags: ['Three.js', 'WebGL', 'React'] 
+    tags: ['Three.js', 'WebGL'] 
   },
-  { 
-    id: 7, 
-    title: 'LabelStudio', 
-    description: 'Generate custom QR codes with various options', 
-    image: process.env.PUBLIC_URL + '/labelstudio.png', 
-    alt: 'QR Code Generator', 
-    href: 'https://labelstudio.netlify.app/', 
-    tags: ['React', 'QR Code', 'Web App'] 
-  },
+
 ];
 
 const INITIAL_COUNT = 4;

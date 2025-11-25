@@ -1,0 +1,345 @@
+/* ඔබේ style.css හි ඇති Global Variables භාවිතා කර ඇත */
+
+.art-page {
+    /* Main Background Color from style.css */
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    min-height: 100vh;
+    /* Fonts will inherit from body (Poppins) defined in style.css */
+    overflow-x: hidden;
+  }
+  
+  /* --- Nav --- */
+  .art-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    position: sticky;
+    top: 0;
+    /* Use dark background with blur */
+    background: rgba(17, 17, 17, 0.95); 
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .art-back-btn {
+    color: var(--text-color);
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 30px;
+    transition: 0.3s;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .art-back-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  .art-nav h2 {
+      font-family: 'Montserrat', sans-serif; /* Your heading font */
+      font-weight: 700;
+  }
+  
+  .art-nav h2 span { color: var(--primary-color); }
+  
+  /* --- Hero --- */
+  .art-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px 50px;
+    min-height: 80vh;
+  }
+  
+  .art-hero-content { max-width: 600px; }
+  
+  .art-hero h1 {
+    font-family: 'Montserrat', sans-serif; /* Heading Font */
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  
+  /* Highlight text uses your Primary Color (Yellow/Gold) */
+  .highlight { color: var(--primary-color); }
+  
+  .art-hero p {
+    color: var(--text-secondary); /* From style.css */
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+  
+  .art-stats {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 40px;
+  }
+  .art-stats h3 { 
+      font-size: 2rem; 
+      margin: 0; 
+      font-family: 'Montserrat', sans-serif;
+  }
+  .art-stats span { color: var(--text-secondary); font-size: 0.9rem; }
+  
+  /* Buttons matching your Main Theme */
+  .cta-button {
+    background: var(--primary-color);
+    color: var(--bg-color); /* Black text on Yellow button */
+    border: none;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .cta-button:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3); 
+  }
+  
+  .art-hero-image img {
+    max-width: 500px;
+    border-radius: 20px;
+    /* Shadow uses primary color subtly */
+    box-shadow: 20px 20px 0px rgba(255, 255, 255, 0.05);
+  }
+  
+  /* --- Gallery --- */
+  .art-gallery { padding: 50px; }
+  
+  .gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .gallery-header h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+  }
+  
+  .filter-tabs button {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    padding: 8px 20px;
+    margin-left: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .filter-tabs button.active, .filter-tabs button:hover {
+    background: var(--primary-color);
+    color: var(--bg-color);
+    border-color: var(--primary-color);
+  }
+  
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+  
+  .gallery-item {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    height: 350px;
+    cursor: pointer;
+    background-color: var(--light-bg);
+  }
+  
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .gallery-item:hover img { transform: scale(1.1); }
+  
+  .item-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, #000, transparent);
+    padding: 20px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: 0.4s ease;
+  }
+  
+  .gallery-item:hover .item-overlay {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .item-overlay h4 {
+      color: var(--primary-color);
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 5px;
+  }
+  
+  .buy-btn {
+    margin-top: 10px;
+    background: var(--primary-color);
+    border: none;
+    color: var(--bg-color);
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  /* --- Pricing --- */
+  .art-pricing { padding: 80px 50px; background: var(--dark-bg); }
+  .section-title { text-align: center; margin-bottom: 60px; }
+  
+  .section-title h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.5rem;
+  }
+  
+  .pricing-cards {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .price-card {
+    background: var(--light-bg); /* Lighter black for cards */
+    padding: 40px;
+    border-radius: 20px;
+    width: 300px;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: 0.3s;
+    position: relative;
+  }
+  
+  .price-card:hover { transform: translateY(-10px); border-color: var(--primary-color); }
+  
+  .price-card.featured {
+    background: var(--light-bg);
+    border: 2px solid var(--primary-color);
+    transform: scale(1.05);
+  }
+  
+  .price-card.featured h2, .price-card.featured h4 {
+      color: var(--primary-color);
+  }
+  
+  .popular-badge {
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  
+  .price-card h4 { font-family: 'Montserrat', sans-serif; margin-bottom: 10px; }
+  
+  .price-card h2 { font-size: 2.5rem; margin: 20px 0; color: var(--text-color); }
+  .price-card h2 span { font-size: 1rem; color: var(--text-secondary); font-weight: 400; }
+  .price-card ul { list-style: none; padding: 0; margin-bottom: 30px; }
+  .price-card ul li { margin-bottom: 10px; color: var(--text-secondary); }
+  
+  .price-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-color);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+  }
+  
+  .price-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+  
+  .price-btn.white-btn { 
+      background: var(--primary-color); 
+      color: var(--bg-color); 
+      border: none; 
+  }
+  .price-btn.white-btn:hover { 
+      background: var(--text-color); 
+      color: var(--bg-color); 
+  }
+  
+  /* --- Contact --- */
+  .art-contact {
+    padding: 80px 50px;
+    text-align: center;
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+  }
+  
+  .art-contact h2 { font-family: 'Montserrat', sans-serif; color: var(--primary-color); }
+  
+  .big-contact-btn {
+    display: inline-block;
+    margin-top: 30px;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    padding: 15px 50px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+    text-transform: uppercase;
+  }
+  .big-contact-btn:hover { 
+      transform: scale(1.05); 
+      box-shadow: 0 0 30px rgba(255, 193, 7, 0.4); 
+  }
+  
+  /* --- Animation Fix --- */
+  .fade-in-up {
+    opacity: 0;
+    animation: fadeInUpArt 0.8s ease-out forwards;
+  }
+  
+  @keyframes fadeInUpArt {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Mobile */
+  @media (max-width: 768px) {
+    .art-hero { flex-direction: column-reverse; text-align: center; padding-top: 40px; }
+    .art-hero h1 { font-size: 2.5rem; }
+    .art-stats { justify-content: center; }
+    .art-hero-image img { width: 100%; margin-bottom: 30px; }
+    .price-card.featured { transform: scale(1); }
+    .art-nav { padding: 15px 20px; }
+  }

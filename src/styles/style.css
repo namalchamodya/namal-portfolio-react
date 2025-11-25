@@ -33,16 +33,11 @@ body {
   overflow-x: hidden;
   line-height: 1.6;
   position: relative;
+  cursor: none;
 }
 
-/* Only hide default cursor on non-mobile devices */
-@media (min-width: 769px) {
-    body, html {
-        cursor: none;
-    }
-    * {
-        cursor: none !important;
-    }
+body, html {
+  cursor: none;
 }
 
 /* Custom Scrollbar */
@@ -63,16 +58,32 @@ body {
   background: var(--secondary-color);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 1rem;
 }
 
-h1 { font-size: 5rem; letter-spacing: -2px; }
-h2 { font-size: 3rem; letter-spacing: -1px; }
-h3 { font-size: 1.8rem; letter-spacing: -0.5px; }
+h1 {
+  font-size: 5rem;
+  letter-spacing: -2px;
+}
+
+h2 {
+  font-size: 3rem;
+  letter-spacing: -1px;
+}
+
+h3 {
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+}
 
 p {
   margin-bottom: 1.5rem;
@@ -122,7 +133,9 @@ img {
   z-index: -1;
 }
 
-.btn:hover::before { width: 100%; }
+.btn:hover::before {
+  width: 100%;
+}
 
 .primary-btn {
   background-color: var(--primary-color);
@@ -165,7 +178,9 @@ img {
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.loader-content { text-align: center; }
+.loader-content {
+  text-align: center;
+}
 
 .loader-circle {
   width: 60px;
@@ -184,11 +199,19 @@ img {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Custom Cursor Styles */
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+/* Custom Cursor */
 .rocket-cursor {
   position: fixed;
   top: 0;
@@ -220,16 +243,31 @@ img {
   transform: rotate(-45deg) scale(0.9);
 }
 
-/* Rocket Trail */
+/* Hide default cursor when rocket cursor is active */
+* {
+  cursor: none !important;
+}
+
+/* Add smooth color transition for SVG elements */
+.rocket-cursor svg path,
+.rocket-cursor svg circle {
+  transition: fill 0.2s ease;
+}
+
+/* --- NEW STYLES FOR THE TRAIL --- */
+
 .rocket-trail {
   position: fixed;
+  /* Must be less than the rocket's z-index (10000) */
   z-index: 9999;
   width: 10px;
   height: 10px;
   background: white;
   border-radius: 50%;
   pointer-events: none;
+  /* Center the particle on the cursor offset */
   transform: translate(-50%, -50%);
+  /* Run the animation */
   animation: fadeOut 3s forwards;
 }
 
@@ -245,7 +283,6 @@ img {
     filter: blur(10px);
   }
 }
-
 /* Navigation */
 nav {
   position: fixed;
@@ -274,7 +311,9 @@ nav.scrolled {
   color: var(--text-color);
 }
 
-.logo span { color: var(--primary-color); }
+.logo span {
+  color: var(--primary-color);
+}
 
 .nav-toggle {
   display: none;
@@ -295,7 +334,9 @@ nav.scrolled {
   list-style: none;
 }
 
-.nav-links li { margin: 0 15px; }
+.nav-links li {
+  margin: 0 15px;
+}
 
 .nav-links a {
   font-weight: 500;
@@ -323,7 +364,9 @@ nav.scrolled {
   left: 0;
 }
 
-.social-icons { display: flex; }
+.social-icons {
+  display: flex;
+}
 
 .social-icons a {
   margin-left: 15px;
@@ -372,6 +415,16 @@ nav.scrolled {
   position: relative;
 }
 
+.canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
 .home-content {
   max-width: 700px;
   z-index: 1;
@@ -382,7 +435,9 @@ nav.scrolled {
   line-height: 1;
 }
 
-.subtitle { margin: 30px 0; }
+.subtitle {
+  margin: 30px 0;
+}
 
 .subtitle p {
   font-size: 1.2rem;
@@ -419,12 +474,24 @@ nav.scrolled {
   margin-bottom: 10px;
 }
 
-.scroll-arrow { animation: bounce 2s infinite; }
+.scroll-arrow {
+  animation: bounce 2s infinite;
+}
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-15px); }
-  60% { transform: translateY(-7px); }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-7px);
+  }
 }
 
 /* About Section */
@@ -456,7 +523,9 @@ nav.scrolled {
   z-index: 1;
 }
 
-.image-container:hover img { transform: scale(1.05); }
+.image-container:hover img {
+  transform: scale(1.05);
+}
 
 .accent-circle {
   position: absolute;
@@ -478,7 +547,9 @@ nav.scrolled {
   margin-bottom: 15px;
 }
 
-.about-content h3:first-child { margin-top: 0; }
+.about-content h3:first-child {
+  margin-top: 0;
+}
 
 .about-cta {
   margin-top: 40px;
@@ -487,18 +558,21 @@ nav.scrolled {
 }
 
 /* Projects Section */
+/* Projects Section Layout */
 .projects-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 40px;
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .projects-container {
     grid-template-columns: 1fr;
   }
 }
 
+/* Project Card Styles */
 .project-item {
   display: flex;
   flex-direction: column;
@@ -507,7 +581,7 @@ nav.scrolled {
   border-radius: 10px;
   overflow: hidden;
   transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease;
-  background-color: var(--light-bg);
+  background-color: var(--light-bg); /* Ensure card has a background */
 }
 
 .project-item.visible {
@@ -535,8 +609,11 @@ nav.scrolled {
   display: block;
 }
 
-.project-item:hover .project-image img { transform: scale(1.05); }
+.project-item:hover .project-image img {
+  transform: scale(1.05);
+}
 
+/* Overlay Styles */
 .project-overlay {
   position: absolute;
   top: 0;
@@ -551,7 +628,9 @@ nav.scrolled {
   transition: opacity 0.3s ease;
 }
 
-.project-image:hover .project-overlay { opacity: 1; }
+.project-image:hover .project-overlay {
+  opacity: 1;
+}
 
 .overlay-content h4 {
   color: var(--primary-color);
@@ -562,9 +641,13 @@ nav.scrolled {
   cursor: pointer;
 }
 
-.project-info { padding: 20px; }
+.project-info {
+  padding: 20px;
+}
 
-.project-info h3 { margin-bottom: 15px; }
+.project-info h3 {
+  margin-bottom: 15px;
+}
 
 .project-tags {
   display: flex;
@@ -574,7 +657,7 @@ nav.scrolled {
 }
 
 .project-tags span {
-  background-color: var(--light-bg);
+  background-color: var(--light-bg); /* Or use a specific color variable */
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
   padding: 5px 15px;
@@ -588,6 +671,9 @@ nav.scrolled {
   margin-top: 80px;
 }
 
+/* --- IMPORTANT: ANIMATION CODE --- */
+
+/* 1. Define the movement (Start lower and invisible, move up and become visible) */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -599,8 +685,10 @@ nav.scrolled {
   }
 }
 
+/* 2. Apply the animation class */
 .project-item.fade-in {
-  opacity: 0; 
+  opacity: 0; /* Hide initially */
+  /* The animation duration is 0.6s. 'forwards' ensures it stays visible at the end. */
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
@@ -646,7 +734,9 @@ nav.scrolled {
   transition: transform 0.5s ease;
 }
 
-.skill-item:hover::before { transform: translateX(0); }
+.skill-item:hover::before {
+  transform: translateX(0);
+}
 
 .skill-item:hover {
   transform: translateY(-10px);
@@ -688,7 +778,9 @@ nav.scrolled {
   color: var(--primary-color);
 }
 
-.contact-details { margin: 40px 0; }
+.contact-details {
+  margin: 40px 0;
+}
 
 .contact-item {
   display: flex;
@@ -738,7 +830,9 @@ nav.scrolled {
   border-radius: 10px;
 }
 
-.form-group { margin-bottom: 25px; }
+.form-group {
+  margin-bottom: 25px;
+}
 
 .form-group label {
   display: block;
@@ -784,7 +878,9 @@ footer {
   margin-bottom: 15px;
 }
 
-.footer-logo span { color: var(--primary-color); }
+.footer-logo span {
+  color: var(--primary-color);
+}
 
 .footer-links {
   display: flex;
@@ -814,7 +910,9 @@ footer {
   font-size: 1.5rem;
 }
 
-.newsletter-form { display: flex; }
+.newsletter-form {
+  display: flex;
+}
 
 .newsletter-form input {
   flex: 1;
@@ -867,21 +965,43 @@ footer {
 
 /* Media Queries */
 @media screen and (max-width: 1200px) {
-  h1 { font-size: 4rem; }
-  h2 { font-size: 2.5rem; }
-  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+  h1 {
+    font-size: 4rem;
+  }
+  h2 {
+    font-size: 2.5rem;
+  }
+  .skills-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media screen and (max-width: 992px) {
-  .section { padding: 100px 30px; }
-  nav { padding: 20px 30px; }
+  .section {
+    padding: 100px 30px;
+  }
+  nav {
+    padding: 20px 30px;
+  }
   .projects-container {
     grid-template-columns: 1fr;
     gap: 30px;
   }
+  .project-item.reverse .project-image {
+    order: 0;
+  }
+  .project-item.reverse .project-info {
+    order: 0;
+  }
   .about-container,
+  .project-item,
+  .project-item.reverse,
   .contact-container {
     grid-template-columns: 1fr;
+  }
+  .project-item.reverse .project-image,
+  .project-item.reverse .project-info {
+    order: unset;
   }
   .footer-content {
     grid-template-columns: 1fr;
@@ -890,8 +1010,12 @@ footer {
 }
 
 @media screen and (max-width: 768px) {
-  h1 { font-size: 3rem; }
-  h2 { font-size: 2rem; }
+  h1 {
+    font-size: 3rem;
+  }
+  h2 {
+    font-size: 2rem;
+  }
   .nav-toggle {
     display: flex;
     z-index: 200;
@@ -910,14 +1034,24 @@ footer {
     transition: right 0.5s ease;
     z-index: 100;
   }
-  .nav-links.active { right: 0; }
-  .social-icons { display: none; }
-  .skills-grid { grid-template-columns: 1fr; }
+  .nav-links.active {
+    right: 0;
+  }
+  .social-icons {
+    display: none;
+  }
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media screen and (max-width: 480px) {
-  h1 { font-size: 2.5rem; }
-  .section { padding: 80px 20px; }
+  h1 {
+    font-size: 2.5rem;
+  }
+  .section {
+    padding: 80px 20px;
+  }
   .cta-buttons {
     flex-direction: column;
     gap: 15px;
@@ -926,7 +1060,9 @@ footer {
     width: 100%;
     text-align: center;
   }
-  .newsletter-form { flex-direction: column; }
+  .newsletter-form {
+    flex-direction: column;
+  }
   .newsletter-form input {
     border-radius: 5px;
     margin-bottom: 10px;

@@ -6,17 +6,34 @@ const Navbar = () => {
 
   const navLinks = [
     { href: '#home', label: 'Home' },
-    { href: '#home', label: 'Courses' },
+    { href: '#home', label: 'Courses' }, 
     { href: '#about', label: 'About' },
     { href: '#projects', label: 'Projects' },
     { href: '#skills', label: 'Skills' },
     { href: '#contact', label: 'Contact' }
   ];
 
+
+  const handleScroll = (e, targetId) => {
+    e.preventDefault(); 
+    
+    closeMenu(); 
+
+    const id = targetId.replace('#', '');
+    const element = document.getElementById(id);
+
+
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
       <div className="logo">
-        <a href="#home">NC<span>.</span></a>
+        <a href="#home" onClick={(e) => handleScroll(e, '#home')}>
+          NC<span>.</span>
+        </a>
       </div>
 
       <div className="nav-toggle" onClick={toggleMenu} aria-label="Toggle navigation">
@@ -25,9 +42,14 @@ const Navbar = () => {
       </div>
 
       <ul className={`nav-links ${menuOpen ? 'active' : ''}`}>
-        {navLinks.map((l) => (
-          <li key={l.href}>
-            <a href={l.href} onClick={closeMenu}>{l.label}</a>
+        {navLinks.map((l, index) => (
+          <li key={index}>
+            <a 
+              href={l.href} 
+              onClick={(e) => handleScroll(e, l.href)}
+            >
+              {l.label}
+            </a>
           </li>
         ))}
       </ul>
