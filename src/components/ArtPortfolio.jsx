@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/artportfolio.css';
 
-// Placeholder Data - (ඔබේ පින්තූර මෙතැනට දාන්න)
+
 const ARTWORKS = [
-  { id: 1, type: 'graphic', src: process.env.PUBLIC_URL + '/art1.jpg', title: 'Brand Identity', price: '$50' },
-  { id: 2, type: 'pencil', src: process.env.PUBLIC_URL + '/art2.jpg', title: 'Portrait Sketch', price: '$30' },
+  { id: 1, type: 'graphic', src: process.env.PUBLIC_URL + '/art/digital-art.png', title: 'Brand Identity', price: '$50' },
+  { id: 2, type: 'pencil', src: process.env.PUBLIC_URL + '/art/pencil-art.jpg', title: 'Portrait Sketch', price: '$30' },
   { id: 3, type: 'graphic', src: process.env.PUBLIC_URL + '/art/Namal_ict.png', title: 'Social Media Kit', price: '$80' },
-  { id: 4, type: 'pencil', src: process.env.PUBLIC_URL + '/art4.jpg', title: 'Realistic Eye', price: '$45' },
-  { id: 5, type: 'graphic', src: process.env.PUBLIC_URL + '/art5.jpg', title: 'Logo Concept', price: '$100' },
-  { id: 6, type: 'pencil', src: process.env.PUBLIC_URL + '/art6.jpg', title: 'Figure Drawing', price: '$40' },
+  { id: 4, type: 'graphic', src: process.env.PUBLIC_URL + '/art/all designs.jpg', title: 'Realistic Eye', price: '$45' },
+  { id: 5, type: 'graphic', src: process.env.PUBLIC_URL + '/art/2027 al 2.png', title: 'Logo Concept', price: '$100' },
+  { id: 6, type: 'pencil', src: process.env.PUBLIC_URL + '/art/art2.png', title: 'Figure Drawing', price: '$40' },
 ];
 
 const ArtPortfolio = () => {
@@ -130,10 +130,10 @@ const ArtPortfolio = () => {
 
       {/* --- Contact Section --- */}
       <section className="art-contact">
-        <div className="contact-box">
+        <div className="  -box">
           <h2>Ready to make something amazing?</h2>
           <p>Let's collaborate on your next project.</p>
-          <a href="mailto:your-email@example.com" className="big-contact-btn">
+          <a href="mailto:namalcg12@gmail.com" className="big-contact-btn">
             Let's Create ➔
           </a>
         </div>

@@ -1,37 +1,53 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useNavScroll from '../hooks/useNavScroll';
 
 const Navbar = () => {
   const { scrolled, menuOpen, toggleMenu, closeMenu } = useNavScroll();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navLinks = [
     { href: '#home', label: 'Home' },
-    { href: '#home', label: 'Courses' }, 
+    { href: '/courses', label: 'Courses' }, // 👈 මෙන්න අලුත් ලින්ක් එක
     { href: '#about', label: 'About' },
     { href: '#projects', label: 'Projects' },
     { href: '#skills', label: 'Skills' },
     { href: '#contact', label: 'Contact' }
   ];
 
+  const handleNavigation = (e, targetHref) => {
+    e.preventDefault();
+    closeMenu();
 
-  const handleScroll = (e, targetId) => {
-    e.preventDefault(); 
-    
-    closeMenu(); 
-
-    const id = targetId.replace('#', '');
-    const element = document.getElementById(id);
-
-
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    // 1. පිටුවකට යන ලින්ක් එකක් නම් (උදා: /courses)
+    if (targetHref.startsWith('/')) {
+      navigate(targetHref);
+    } 
+    // 2. Scroll ලින්ක් එකක් නම් (උදා: #about)
+    else if (targetHref.startsWith('#')) {
+      // Home Page එකේ නැත්නම්, මුලින්ම Home එකට යන්න
+      if (location.pathname !== '/') {
+        navigate('/');
+        // පිටුව මාරු වීමට පොඩි වෙලාවක් දීලා Scroll කරන්න
+        setTimeout(() => {
+          const id = targetHref.replace('#', '');
+          const element = document.getElementById(id);
+          if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      } else {
+        // දැනටමත් Home එකේ නම් කෙලින්ම Scroll කරන්න
+        const id = targetHref.replace('#', '');
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
       <div className="logo">
-        <a href="#home" onClick={(e) => handleScroll(e, '#home')}>
+        <a href="#home" onClick={(e) => handleNavigation(e, '#home')}>
           NC<span>.</span>
         </a>
       </div>
@@ -46,7 +62,7 @@ const Navbar = () => {
           <li key={index}>
             <a 
               href={l.href} 
-              onClick={(e) => handleScroll(e, l.href)}
+              onClick={(e) => handleNavigation(e, l.href)}
             >
               {l.label}
             </a>

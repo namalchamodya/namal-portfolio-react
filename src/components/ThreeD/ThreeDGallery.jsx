@@ -45,13 +45,13 @@ const ThreeDGallery = () => {
           ← Back to Portfolio
         </Link>
 
-        <div>
+        {/* <div>
         <p style={{ color: '#aaa', marginTop: '10px', textAlign: 'center' }}>
         Drag to Rotate • Scroll to Zoom
         </p>
       </div>
-      
-        <h2>3D Laboratory</h2>
+       */}
+      <h2>NC<span>.3D</span></h2>
 
       </nav>
 
