@@ -1,65 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../../styles/courses.css';
-
-const COURSES_DATA = [
-  {
-    id: 1,
-    title: "React JS Masterclass",
-    description: "Learn React from scratch to advanced. Build real-world projects.",
-    thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1000&auto=format&fit=crop", // Sample Image
-    lessons: [
-      { id: 1, title: "Introduction to React (Free Demo)", isLocked: false },
-      { id: 2, title: "Components & Props", isLocked: true },
-      { id: 3, title: "State Management", isLocked: true },
-      { id: 4, title: "React Router", isLocked: true }
-    ],
-    price: "LKR 5,000"
-  },
-  {
-    id: 2,
-    title: "UI/UX Design for Beginners",
-    description: "Master Figma and design principles with practical examples.",
-    thumbnail: "https://images.unsplash.com/photo-1586717791821-3f44a5638d48?q=80&w=1000&auto=format&fit=crop",
-    lessons: [
-      { id: 1, title: "What is UX? (Free Demo)", isLocked: false },
-      { id: 2, title: "Wireframing Basics", isLocked: true },
-      { id: 3, title: "Prototyping in Figma", isLocked: true }
-    ],
-    price: "LKR 3,500"
-  }
-];
+import { COURSES_DATA } from './data/coursesData'; 
+import '../../styles/courses.css'; 
+import Footer from '../Portfolio/Footer.jsx';
 
 const CoursesLanding = () => {
-  // දැනට අපි හිතමු User Log වෙලා නෑ කියලා
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   return (
-    <div className="courses-page">
-      {/* Navigation */}
+    <div className="courses-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* --- Navigation --- */}
       <nav className="course-navbar">
         <Link to="/" className="back-link">← Back to Portfolio</Link>
         <div className="auth-buttons">
-          {!isLoggedIn ? (
-            <button className="login-btn" onClick={() => alert('Login Form will open here!')}>Login</button>
-          ) : (
-            <div className="user-profile">Namal (Student)</div>
-          )}
+          <button className="login-btn" style={{opacity: 0.5, cursor: 'not-allowed'}}>Login (Coming Soon)</button>
         </div>
       </nav>
 
+      {/* --- Header --- */}
       <header className="courses-header">
-        <h1>My Learning <span className="highlight">Hub</span></h1>
-        <p>Master new skills with my premium courses. Watch free demos before you enroll.</p>
+        <h1>Namal's Learning <span className="highlight">Hub</span></h1>
+        <p>Master ICT & Design. Select a course to start learning.</p>
       </header>
 
-      <div className="courses-grid">
+      {/* --- Courses Grid --- */}
+      <div className="courses-grid" style={{ flex: '1' }}>
         {COURSES_DATA.map((course) => (
           <div key={course.id} className="course-card">
+            
+            {/* Thumbnail & Price */}
             <div className="course-thumb">
               <img src={course.thumbnail} alt={course.title} />
               <div className="price-tag">{course.price}</div>
@@ -69,36 +40,62 @@ const CoursesLanding = () => {
               <h3>{course.title}</h3>
               <p className="course-desc">{course.description}</p>
               
+              {/* --- Lesson List --- */}
               <div className="lesson-list">
                 <h4>Course Content:</h4>
                 <ul>
-                  {course.lessons.map((lesson) => (
-                    <li key={lesson.id} className={lesson.isLocked && !isLoggedIn ? "locked" : "unlocked"}>
+                  {course.lessons.slice(0, 3).map((lesson) => (
+                    <li key={lesson.id} className={lesson.isLocked ? "locked" : "unlocked"}>
                       <span className="icon">
-                        {lesson.isLocked && !isLoggedIn ? "🔒" : "▶️"}
+                        {lesson.isLocked ? "🔒" : "▶️"}
                       </span>
                       <span className="lesson-title">{lesson.title}</span>
                       
-                      {/* Demo Button Logic */}
-                      {(!lesson.isLocked) && (
-                        <button className="play-demo-btn">Watch Demo</button>
+                      {/* Demo Button Logic (Based on your CSS .play-demo-btn) */}
+                      {!lesson.isLocked && (
+                        <Link 
+                          to={`/course/${course.id}`} 
+                          className="play-demo-btn"
+                        >
+                          Watch Demo
+                        </Link>
                       )}
                     </li>
                   ))}
+                  
+                  {/* More Lessons Count */}
+                  {course.lessons.length > 3 && (
+                    <li style={{color:'#666', fontSize:'0.8rem', justifyContent: 'center', borderBottom: 'none'}}>
+                      + {course.lessons.length - 3} more lessons
+                    </li>
+                  )}
                 </ul>
               </div>
 
+              {/* --- Action Button (Enroll) --- */}
               <div className="card-actions">
-                {isLoggedIn ? (
-                  <button className="enroll-btn">Continue Learning</button>
-                ) : (
-                  <button className="enroll-btn">Enroll Now to Unlock All</button>
-                )}
+                <Link 
+                  to={`/course/${course.id}`} 
+                  className="enroll-btn" 
+                  style={{
+                    textAlign: 'center', 
+                    display: 'block', 
+                    textDecoration: 'none',
+                  }}
+                >
+                  Enroll Now - {course.price}
+                </Link>
               </div>
+
             </div>
           </div>
         ))}
       </div>
+      {/* --- Footer --- */}
+
+        <div style={{ marginTop: 'auto', width: '100%' }}>
+          <Footer />
+        </div>
     </div>
   );
 };

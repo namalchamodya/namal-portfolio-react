@@ -1,0 +1,263 @@
+/* src/styles/coursePlayer.css */
+
+.player-container {
+    background-color: var(--bg-color);
+    min-height: 100vh;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .player-nav {
+    background: #111;
+    padding: 15px 30px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .back-btn {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid #333;
+    padding: 5px 15px;
+    border-radius: 20px;
+    transition: 0.3s;
+  }
+  
+  .back-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+  .player-nav h2 { margin: 0; font-size: 1.2rem; color: #fff; }
+  
+  .player-layout {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+  }
+  
+  .video-area {
+    flex: 3;
+    padding: 20px;
+    overflow-y: auto;
+    background: #000;
+  }
+  
+  /* --- VIDEO PLAYER STYLES (Fixed Black Screen) --- */
+  
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    background: #000; /* වීඩියෝ එක ලෝඩ් වෙනකම් කළු පාටයි */
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  
+  /* iframe එක හරියටම මැදට සහ සම්පූර්ණ ඉඩ ගන්නා බව තහවුරු කිරීම */
+  #youtube-player, .video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* වීඩියෝ එක යටින් තියෙන්නේ */
+  }
+  
+  /* 👇 වැදගත්ම වෙනස: Overlay එක සම්පූර්ණයෙන්ම Transparent කිරීම */
+  .video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 50px); /* Controls වලට ඉඩ තියන්න */
+    background: rgba(0, 0, 0, 0) !important; /* ✅ පාට අයින් කළා */
+    z-index: 10; /* වීඩියෝ එකට උඩින් */
+    cursor: pointer;
+  }
+  
+  /* Controls Bar */
+  .custom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.8); /* controls පේන්න ලා කළු පාටක් */
+    display: flex;
+    flex-direction: column;
+    z-index: 20; /* හැමෝටම උඩින් */
+    padding: 0 10px;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .video-wrapper:hover .custom-controls {
+    opacity: 1;
+  }
+  
+  /* Progress Bar */
+  .progress-bar {
+    width: 100%;
+    height: 5px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    margin-bottom: 5px;
+  }
+  
+  .controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5px;
+  }
+  
+  .left-controls, .right-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .ctrl-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 0 5px;
+  }
+  
+  .ctrl-btn:hover { color: var(--primary-color); }
+  
+  .time-display {
+    font-size: 0.8rem;
+    color: #ddd;
+    font-family: monospace;
+  }
+  
+  .vol-icon { font-size: 1rem; }
+  
+  .volume-slider {
+    width: 80px;
+    accent-color: var(--primary-color);
+  }
+  
+  /* --- End Video Styles --- */
+  
+  .video-info { margin-top: 20px; }
+  .video-info h3 { color: var(--primary-color); margin-bottom: 5px; }
+
+
+  /* Fullscreen Button Style */
+.fs-btn {
+    margin-left: 15px; /* Volume එකෙන් ටිකක් ඈත් කරන්න */
+    font-size: 1.2rem;
+    padding: 0 5px;
+  }
+  
+  .fs-btn:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+  }
+  
+  /* Fullscreen Mode එකේදී Controls පෙනුම */
+  .video-wrapper:fullscreen .custom-controls {
+    padding-bottom: 20px; /* Fullscreen එකේදි ටිකක් උඩට ගන්න */
+  }
+  
+  /* Fullscreen එකේදී Video Wrapper එක 100% වෙනවා */
+  .video-wrapper:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+  }
+  
+  /* Lesson Resources */
+  .lesson-resources {
+    margin-top: 25px;
+    padding: 20px;
+    background: #111;
+    border-radius: 10px;
+    border: 1px solid #222;
+  }
+  
+  .lesson-resources h4 {
+    color: #ddd; font-size: 1rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;
+  }
+  
+  .resource-links { display: flex; gap: 15px; flex-wrap: wrap; }
+  
+  .resource-btn {
+    background: #222; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 5px; font-size: 0.9rem; border: 1px solid #444; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+  }
+  
+  .resource-btn:hover { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
+  
+  /* Sidebar */
+  .playlist-sidebar {
+    flex: 1; background: #0a0a0a; border-left: 1px solid #222; display: flex; flex-direction: column; min-width: 300px;
+  }
+  
+  .sidebar-header { padding: 20px; border-bottom: 1px solid #222; background: #111; }
+  .sidebar-header h4 { margin: 0; color: #fff; }
+  .sidebar-header span { font-size: 0.8rem; color: #666; }
+  
+  .lesson-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
+  
+  .lesson-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #1a1a1a; cursor: pointer; transition: 0.2s; }
+  .lesson-item:hover { background: #1a1a1a; }
+  .lesson-item.active { background: rgba(255, 193, 7, 0.1); border-left: 4px solid var(--primary-color); }
+  .lesson-number { font-size: 0.9rem; color: #444; margin-right: 15px; width: 20px; }
+  .lesson-details { display: flex; flex-direction: column; flex: 1; }
+  .lesson-name { color: #ddd; font-size: 0.95rem; margin-bottom: 4px; }
+  .lesson-item.active .lesson-name { color: var(--primary-color); font-weight: 600; }
+  .lesson-duration { color: #555; font-size: 0.75rem; }
+  .playing-icon { color: var(--primary-color); font-size: 0.8rem; }
+  
+  @media (max-width: 900px) {
+    .player-layout { flex-direction: column; height: auto; }
+    .playlist-sidebar { height: 400px; }
+  }
+
+
+/* Custom Cursor Styles for Course Player */
+.player-container, 
+.player-container * {
+  cursor: auto !important; /* 'auto' හෝ 'default' මගින් සාමාන්‍ය මවුස් එක එයි */
+}
+
+
+.back-btn, 
+.ctrl-btn, 
+.lesson-item, 
+.resource-btn,
+.video-overlay,
+.progress-bar,
+.volume-slider {
+  cursor: pointer !important;
+}
+
+/* 3. Fullscreen ගියාම අනිවාර්යයෙන්ම මවුස් එක පෙන්වන්න */
+.video-wrapper:fullscreen {
+  cursor: default !important;
+}
+
+/* Fullscreen එකේදි Controls උඩට ගියාම Pointer පෙන්වන්න */
+.video-wrapper:fullscreen .ctrl-btn,
+.video-wrapper:fullscreen .progress-bar {
+  cursor: pointer !important;
+}
+
+/* 4. Overlay Logic (කලින් දුන් එක) */
+.video-overlay {
+  background: rgba(0, 0, 0, 0) !important;
+}

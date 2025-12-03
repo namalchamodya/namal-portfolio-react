@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Loader from './components/Loader';
 import Cursor from './components/Cursor';
-import Footer from './components/Footer';
 
-// Import Pages
-import MainContent from './components/MainContent';
+// Import Pages (Correct Paths)
+import LandingPage from './components/Landing/LandingPage.jsx';
+import Footer from './components/Portfolio/Footer';
+import MainContent from './components/Portfolio/MainContent'; 
 import ThreeDGallery from './components/ThreeD/ThreeDGallery';
 import ArtPortfolio from './components/ArtPortfolio';
 import CoursesLanding from './components/Courses/CoursesLanding';
+import CoursePlayer from './components/Courses/CoursePlayer';
 
-// Styles & Scripts
 import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
 import './styles/blackhole.css';
@@ -21,44 +22,53 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    // Loader Logic
+    // Loader එක තත්පර 1.2 කින් අනිවාර්යයෙන්ම අයින් කරන්න
     const t = setTimeout(() => setLoading(false), 1200);
-
-    // GSAP Setup
+    
     const animationTimer = setTimeout(() => {
-      setupGSAP();
+      try {
+        setupGSAP();
+      } catch (e) {
+        console.log("GSAP setup error (ignored):", e);
+      }
       window.scrollTo(0, 0);
     }, 100);
 
-    return () => {
-      clearTimeout(t);
-      clearTimeout(animationTimer);
-    };
+    return () => { clearTimeout(t); clearTimeout(animationTimer); };
   }, [location.pathname]);
 
-  // Black Hole
+  const isPlayerPage = location.pathname.startsWith('/course/');
+
+  // Landing Page ('/') එකෙත් Black Hole එක ඕන නෑ (එතන වෙනම එකක් තියෙනවා)
   const isSpecialPage = 
+    location.pathname === '/' ||
     location.pathname === '/3d-projects' || 
     location.pathname === '/art-portfolio' ||
-    location.pathname === '/courses';
+    location.pathname === '/courses' ||
+    isPlayerPage;
+
+  // Footer එක පෙන්විය යුත්තේ Portfolio පිටුවේ පමණයි
+  const showGlobalFooter = location.pathname === '/portfolio';
 
   return (
     <>
+      {/* BlackHole පෙන්වන්නේ අවශ්‍ය තැන්වල විතරයි */}
       {!isSpecialPage && <BlackHoleBackground />}
-
+      
       {loading && <Loader />}
-      <Cursor />
+      
+      {!isPlayerPage && <Cursor />}
 
       <Routes>
-        <Route path="/" element={<MainContent />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/portfolio" element={<MainContent />} />
         <Route path="/3d-projects" element={<ThreeDGallery />} />
         <Route path="/art-portfolio" element={<ArtPortfolio />} />
-        
-        
         <Route path="/courses" element={<CoursesLanding />} />
+        <Route path="/course/:id" element={<CoursePlayer />} />
       </Routes>
 
-      <Footer />
+      {showGlobalFooter && <Footer />}
     </>
   );
 }
