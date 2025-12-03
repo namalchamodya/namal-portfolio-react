@@ -86,7 +86,8 @@ const LandingNavbar = () => {
           <li className="l-nav-item dropdown-trigger">
             <span className="l-nav-link">Store ▼</span>
             <ul className="l-dropdown">
-              <li><a href="#electronics" onClick={() => setIsOpen(false)}>Electronics</a></li>
+              {/* 👇 මෙන්න වෙනස්කම: Electronics Store Link එක දැම්මා */}
+              <li><Link to="/store/electronics" onClick={() => setIsOpen(false)}>Electronics</Link></li>
               <li><a href="#software" onClick={() => setIsOpen(false)}>Software</a></li>
               <li><a href="#books" onClick={() => setIsOpen(false)}>Books</a></li>
             </ul>

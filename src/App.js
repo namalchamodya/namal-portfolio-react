@@ -9,8 +9,13 @@ import Footer from './components/Portfolio/Footer';
 import MainContent from './components/Portfolio/MainContent'; 
 import ThreeDGallery from './components/ThreeD/ThreeDGallery';
 import ArtPortfolio from './components/ArtPortfolio';
+
+// Import Course Pages
 import CoursesLanding from './components/Courses/CoursesLanding';
 import CoursePlayer from './components/Courses/CoursePlayer';
+
+// Import Store Pages
+import ElectronicsStore from './components/Store/ElectronicsStore';
 
 import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
@@ -45,6 +50,7 @@ function App() {
     location.pathname === '/3d-projects' || 
     location.pathname === '/art-portfolio' ||
     location.pathname === '/courses' ||
+    location.pathname.startsWith('/store/') ||
     isPlayerPage;
 
   // Footer එක පෙන්විය යුත්තේ Portfolio පිටුවේ පමණයි
@@ -66,6 +72,8 @@ function App() {
         <Route path="/art-portfolio" element={<ArtPortfolio />} />
         <Route path="/courses" element={<CoursesLanding />} />
         <Route path="/course/:id" element={<CoursePlayer />} />
+        <Route path="/store/electronics" element={<ElectronicsStore />} />
+        {/* <Route path="/store/electronics/:id" element={<ProductDetails />} /> */}
       </Routes>
 
       {showGlobalFooter && <Footer />}
