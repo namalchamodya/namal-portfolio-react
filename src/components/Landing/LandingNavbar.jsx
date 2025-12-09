@@ -31,13 +31,13 @@ const LandingNavbar = () => {
 
   // 👇 Scroll Function
   const handleScrollToContact = (e) => {
-    e.preventDefault(); // URL එකේ #contact වැටෙන එක නවත්වනවා (optional)
-    setIsOpen(false);   // Mobile Menu එක වහනවා
+    e.preventDefault(); 
+    setIsOpen(false);  
 
-    // අපි ඉන්නේ Home Page ('/') එකේ නෙවෙයි නම්, මුලින් Home එකට යන්න
+
     if (location.pathname !== '/') {
       navigate('/');
-      // පිටුව මාරු වෙන්න පොඩි වෙලාවක් දීලා Scroll කරන්න
+
       setTimeout(() => {
         const contactSection = document.getElementById('contact');
         if (contactSection) {
@@ -45,7 +45,6 @@ const LandingNavbar = () => {
         }
       }, 500);
     } else {
-      // දැනටමත් Home එකේ නම් කෙලින්ම Scroll කරන්න
       const contactSection = document.getElementById('contact');
       if (contactSection) {
         contactSection.scrollIntoView({ behavior: 'smooth' });
@@ -86,14 +85,13 @@ const LandingNavbar = () => {
           <li className="l-nav-item dropdown-trigger">
             <span className="l-nav-link">Store ▼</span>
             <ul className="l-dropdown">
-              {/* 👇 මෙන්න වෙනස්කම: Electronics Store Link එක දැම්මා */}
               <li><Link to="/store/electronics" onClick={() => setIsOpen(false)}>Electronics</Link></li>
-              <li><a href="#software" onClick={() => setIsOpen(false)}>Software</a></li>
-              <li><a href="#books" onClick={() => setIsOpen(false)}>Books</a></li>
+              <li><Link to="/store/software" onClick={() => setIsOpen(false)}>Software</Link></li>
+              <li><Link to="/store/books" onClick={() => setIsOpen(false)}>Books & Papers</Link></li>
             </ul>
           </li>
           <li className="l-nav-item">
-            <a href="#blog" className="l-nav-link" onClick={() => setIsOpen(false)}>Blog</a>
+            <Link to="/blog" className="l-nav-link" onClick={() => setIsOpen(false)}>Blog</Link>
           </li>
           
           {/* Mobile Only Contact Button */}

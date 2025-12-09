@@ -37,10 +37,10 @@ const LandingFooter = () => {
         <div className="l-footer-col">
           <h3>Store & Blog</h3>
           <ul>
-            <li><a href="#electronics">Electronic Modules</a></li>
-            <li><a href="#software">Source Codes</a></li>
+            <li><a href="/store/electronics">Electronic Modules</a></li>
+            <li><a href="/software">Source Codes</a></li>
             <li><a href="#blog">Tech Articles</a></li>
-            <li><a href="#books">E-Books</a></li>
+            <li><a href="/store/books">E-Books</a></li>
           </ul>
         </div>
 
@@ -61,8 +61,10 @@ const LandingFooter = () => {
       <div className="l-footer-bottom">
         <p>&copy; 2025 Namal Chamodya. All Rights Reserved.</p>
         <div className="l-footer-legal">
-          <a href="#">Privacy Policy</a>
+          <p><a href="#">Privacy Policy</a>
+          <nbps> | </nbps>
           <a href="#">Terms of Service</a>
+          </p>
         </div>
       </div>
     </footer>

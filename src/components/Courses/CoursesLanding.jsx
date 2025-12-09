@@ -2,10 +2,13 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { COURSES_DATA } from './data/coursesData'; 
 import '../../styles/courses.css'; 
-import Footer from '../Portfolio/Footer.jsx';
+import LandingFooter from '../Landing/LandingFooter';
 
 const CoursesLanding = () => {
   useEffect(() => {
+    // Set page title
+    document.title = "Namal Chamodya | Learning Hub";
+
     window.scrollTo(0, 0);
   }, []);
 
@@ -93,9 +96,10 @@ const CoursesLanding = () => {
       </div>
       {/* --- Footer --- */}
 
-        <div style={{ marginTop: 'auto', width: '100%' }}>
-          <Footer />
+        <div style={{ marginTop: 'auto', width: '100%', bottom: 0 }}>
+          
         </div>
+        <LandingFooter />
     </div>
   );
 };

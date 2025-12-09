@@ -11,6 +11,9 @@ import { COURSES_DATA } from '../Courses/data/coursesData';
 
 const LandingPage = () => {
   useEffect(() => {
+    // Set page title
+    document.title = "Namal Chamodya | Official Web";
+
     window.scrollTo(0, 0);
     
     const observer = new IntersectionObserver((entries) => {
@@ -22,14 +25,14 @@ const LandingPage = () => {
     document.querySelectorAll('.l-fade-in').forEach(el => observer.observe(el));
   }, []);
 
-  // ✅ Auto Updates Logic: අලුත්ම Courses 2ක් ගන්නවා (Reverse කරලා මුල් 2 ගන්නවා)
+  // ✅ Auto Updates Logic:
   const latestCourses = [...COURSES_DATA].reverse().slice(0, 2).map(course => ({
     id: `course-${course.id}`,
     tag: 'Course',
     title: course.title,
-    date: 'New Release', // නැත්නම් අද දිනය දාන්න පුළුවන්
+    date: 'New Release',
     img: course.thumbnail,
-    link: `/course/${course.id}` // Course Player එකට ලින්ක් එක
+    link: `/course/${course.id}` // link for each course
   }));
 
   // Manual Updates (Products / Art)
@@ -44,7 +47,7 @@ const LandingPage = () => {
     }
   ];
 
-  // ඔක්කොම Updates එකතු කිරීම (Courses + Other)
+
   const allUpdates = [...latestCourses, ...otherUpdates];
 
   return (
@@ -102,7 +105,7 @@ const LandingPage = () => {
         <h2 className="l-section-title">Latest <span className="l-highlight">Updates</span></h2>
         <div className="updates-grid">
           {allUpdates.map((item) => (
-            // 👇 Link එකක් ලෙස හැදුවා, Click කළාම අදාළ තැනට යනවා
+
             <Link to={item.link} key={item.id} className="update-card has-img" style={{textDecoration:'none', color:'inherit'}}>
               <div className="card-img-holder">
                   <img src={item.img} alt={item.title} />

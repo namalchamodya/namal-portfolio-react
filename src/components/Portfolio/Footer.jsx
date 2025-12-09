@@ -33,12 +33,12 @@ const Footer = () => {
         </div>
 
         <div className="footer-links">
-          {/* සියලුම Links වලට handleNavigation එකතු කරන ලදි */}
           <a href="#home">Home</a>
           <a href="#about" onClick={(e) => handleNavigation(e, '#about')}>About</a>
           <a href="#projects" onClick={(e) => handleNavigation(e, '#projects')}>Projects</a>
           <a href="#skills" onClick={(e) => handleNavigation(e, '#skills')}>Skills</a>
           <a href="#contact" onClick={(e) => handleNavigation(e, '#contact')}>Contact</a>
+
         </div>
 
         <div className="footer-newsletter">

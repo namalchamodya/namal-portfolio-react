@@ -8,6 +8,8 @@ import Contact from './Contact';
 
 const MainContent = () => {
   useEffect(() => {
+
+    document.title = "Namal Chamodya | Portfolio";
     // Ensure we start at the top so animations trigger correctly
     window.scrollTo(0, 0);
     
@@ -38,3 +40,5 @@ const MainContent = () => {
 };
 
 export default MainContent;
+
+

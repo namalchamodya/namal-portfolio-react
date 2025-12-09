@@ -16,6 +16,11 @@ import CoursePlayer from './components/Courses/CoursePlayer';
 
 // Import Store Pages
 import ElectronicsStore from './components/Store/ElectronicsStore';
+import BookStore from './components/Store/BookStore';
+import SoftwareStore from './components/Store/SoftwareStore';
+
+// Blog pages
+import BlogFeed from './components/Blog/BlogFeed';
 
 import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
@@ -27,7 +32,6 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    // Loader එක තත්පර 1.2 කින් අනිවාර්යයෙන්ම අයින් කරන්න
     const t = setTimeout(() => setLoading(false), 1200);
     
     const animationTimer = setTimeout(() => {
@@ -44,7 +48,7 @@ function App() {
 
   const isPlayerPage = location.pathname.startsWith('/course/');
 
-  // Landing Page ('/') එකෙත් Black Hole එක ඕන නෑ (එතන වෙනම එකක් තියෙනවා)
+
   const isSpecialPage = 
     location.pathname === '/' ||
     location.pathname === '/3d-projects' || 
@@ -53,12 +57,10 @@ function App() {
     location.pathname.startsWith('/store/') ||
     isPlayerPage;
 
-  // Footer එක පෙන්විය යුත්තේ Portfolio පිටුවේ පමණයි
   const showGlobalFooter = location.pathname === '/portfolio';
 
   return (
     <>
-      {/* BlackHole පෙන්වන්නේ අවශ්‍ය තැන්වල විතරයි */}
       {!isSpecialPage && <BlackHoleBackground />}
       
       {loading && <Loader />}
@@ -73,6 +75,9 @@ function App() {
         <Route path="/courses" element={<CoursesLanding />} />
         <Route path="/course/:id" element={<CoursePlayer />} />
         <Route path="/store/electronics" element={<ElectronicsStore />} />
+        <Route path="/store/books" element={<BookStore />} />
+        <Route path="/store/software" element={<SoftwareStore />} />
+        <Route path="/blog" element={<BlogFeed />} />
         {/* <Route path="/store/electronics/:id" element={<ProductDetails />} /> */}
       </Routes>
 

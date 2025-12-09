@@ -16,14 +16,14 @@ const CoursePlayer = () => {
   const [volume, setVolume] = useState(100);
   const [lessonDurations, setLessonDurations] = useState({});
   
-  // ✅ අලුත්: Full Screen State
+  // Full Screen State
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const playerRef = useRef(null); 
   const intervalRef = useRef(null);
-  const videoContainerRef = useRef(null); // ✅ Video Container එක අල්ලගන්න Ref එකක්
+  const videoContainerRef = useRef(null);
 
-  // 1. Course එක සොයා ගැනීම
+  // 1. Course
   useEffect(() => {
     const foundCourse = COURSES_DATA.find((c) => c.id === parseInt(id));
     if (foundCourse) {
@@ -35,7 +35,7 @@ const CoursePlayer = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // ✅ Full Screen වෙනස්වීම් අහගෙන ඉන්න (Esc එබුවොත් Icon එක මාරු වෙන්න)
+  // Full Screen
   useEffect(() => {
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
@@ -204,11 +204,10 @@ const CoursePlayer = () => {
       <div className="player-layout">
         <div className="video-area">
           
-          {/* ✅ ref={videoContainerRef} එකතු කළා */}
           <div className="video-wrapper custom-controls-wrapper" ref={videoContainerRef}>
             <div id="youtube-player"></div>
             
-            {/* Double click කළාම Fullscreen වෙන්න හදන්න පුළුවන් (Optional) */}
+            {/* Double click කළාම Fullscreen*/}
             <div className="video-overlay" onClick={togglePlay} onDoubleClick={toggleFullScreen}></div>
 
             <div className="custom-controls">
@@ -232,7 +231,7 @@ const CoursePlayer = () => {
                             value={volume} onChange={handleVolume} 
                          />
                          
-                         {/* ✅ Full Screen Button */}
+                         {/* Full Screen Button */}
                          <button className="ctrl-btn fs-btn" onClick={toggleFullScreen} title="Fullscreen">
                             {isFullScreen ? "✖" : "⛶"}
                          </button>

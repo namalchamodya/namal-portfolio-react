@@ -35,6 +35,9 @@ const MY_MODELS = [
 
 const ThreeDGallery = () => {
   useEffect(() => {
+    // Set page title
+    document.title = "Namal Chamodya | 3D Gallery";
+
     window.scrollTo(0, 0);
   }, []);
 

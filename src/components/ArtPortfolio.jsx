@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/artportfolio.css';
+import LandingFooter from './Landing/LandingFooter';
 
 
 const ARTWORKS = [
@@ -16,6 +17,9 @@ const ArtPortfolio = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
+    // Set page title
+    document.title = "Namal Chamodya | Art & Designs";
+    
     window.scrollTo(0, 0);
   }, []);
 
@@ -138,7 +142,7 @@ const ArtPortfolio = () => {
           </a>
         </div>
       </section>
-
+      <LandingFooter />
     </div>
   );
 };
