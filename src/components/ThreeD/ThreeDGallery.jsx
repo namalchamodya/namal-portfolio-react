@@ -45,7 +45,7 @@ const ThreeDGallery = () => {
     <div className="threed-page-container">
       <nav className="threed-navbar">
         <Link to="/" className="back-button">
-          ← Back to Portfolio
+          ← Back
         </Link>
 
         {/* <div>

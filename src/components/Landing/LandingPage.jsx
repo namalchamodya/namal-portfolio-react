@@ -68,7 +68,7 @@ const LandingPage = () => {
           Whether you are here to learn, buy, or be inspired—you've found the right place.          </p>
           <div className="l-hero-btns">
             <Link to="/portfolio" className="l-btn primary">View Portfolio</Link>
-            <a href="#store" className="l-btn secondary">Visit Store</a>
+            <Link to="/store/electronics" className="l-btn secondary">Visit Store</Link>
           </div>
         </div>
       </header>
@@ -78,11 +78,24 @@ const LandingPage = () => {
         <div className="showcase-container">
             <div className="showcase-text">
                 <h2 className="l-section-title">Featured <span className="l-highlight">3D Creation</span></h2>
-                <h3>Cyber-Punk Drone V1</h3>
+                {/* <h3>⚠️ CRITICAL ADVICE:</h3>
                 <p>
                     A fully rigged and animated 3D model designed for game engines. 
                     Modeled in Blender, textured in Substance Painter.
-                </p>
+                </p> */}
+                <div style={{ 
+                    borderLeft: '4px solid #f39c12', 
+                    paddingLeft: '15px', 
+                    margin: '15px 0',
+                    backgroundColor: 'rgba(243, 156, 18, 0.1)', 
+                    padding: '10px' 
+                }}>
+                    <p style={{ margin: 0, fontStyle: 'italic', color: '#ddd' }}>
+                        <strong>⚠️ CRITICAL ADVICE:</strong> <br/>
+                        "Deep space environment detected. To navigate this universe safely, 
+                        equipping this Space Suit is highly recommended."
+                    </p>
+                </div>
                 <Link to="/3d-projects" className="l-btn secondary" style={{marginTop:'20px', display:'inline-block'}}>
                     View in 3D Lab →
                 </Link>

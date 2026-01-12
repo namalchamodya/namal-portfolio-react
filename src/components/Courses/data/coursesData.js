@@ -10,7 +10,7 @@ export const COURSES_DATA = [
           id: 101, 
           title: "Introduction to ICT (Free Demo)", 
           isLocked: false, 
-          videoId: "LQqBoNAPWRg",
+          videoId: "O6P86uwfdR0",
           duration: "10:00",
           resources: [
             { label: "Download Syllabus", url: "https://example.com/syllabus.pdf" }
@@ -57,7 +57,7 @@ export const COURSES_DATA = [
       thumbnail: process.env.PUBLIC_URL + '/course/class1.jpg',
       price: "LKR 15,000",
       lessons: [
-        { id: 201, title: "Introduction Lesson", isLocked: false, videoId: "LQqBoNAPWRg", duration: "10:00", resources: [] },
+        { id: 201, title: "Introduction Lesson", isLocked: false, videoId: "O6P86uwfdR0", duration: "10:00", resources: [] },
         { id: 202, title: "Hardware Basics", isLocked: true, videoId: "dGcsHMXbSOA", duration: "15:00", resources: [] },
         { id: 203, title: "Hardware Basics", isLocked: true, videoId: "dGcsHMXbSOA", duration: "15:00", resources: [] },
         { id: 204, title: "Hardware Basics", isLocked: true, videoId: "dGcsHMXbSOA", duration: "15:00", resources: [] },

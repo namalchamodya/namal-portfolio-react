@@ -1,6 +1,15 @@
 import React from 'react';
 
 const Home = () => {
+
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+
   return (
     <section id="home" className="section">
       {/* Background is now in App.js */}
@@ -20,8 +29,19 @@ const Home = () => {
           <p>Crafting immersive digital experiences through code and design.</p>
         </div>
         <div className="cta-buttons">
-          <a href="#projects" className="btn primary-btn">View Projects</a>
-          <a href="#contact" className="btn secondary-btn">Get In Touch</a>
+          <button 
+            onClick={() => scrollToSection('projects')} 
+            className="btn primary-btn"
+          >
+            View Projects
+          </button>          
+
+          <button 
+            onClick={() => scrollToSection('contact')} 
+            className="btn secondary-btn"
+          >
+            Get In Touch
+          </button>          
         </div>
       </div>
       <div className="scroll-indicator">

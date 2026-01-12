@@ -31,7 +31,7 @@ const ArtPortfolio = () => {
     <div className="art-page">
       {/* --- Navbar Area --- */}
       <nav className="art-nav">
-        <Link to="/" className="art-back-btn">← Back to Home</Link>
+        <Link to="/" className="art-back-btn">← Home</Link>
         <h2>NC<span>.ART</span></h2>
       </nav>
 

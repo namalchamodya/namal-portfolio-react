@@ -5,22 +5,22 @@ const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Scroll Handling Function
   const handleNavigation = (e, targetId) => {
-    e.preventDefault(); // 1. URL එක වෙනස් වීම වළක්වයි (Crash එක නවත්වයි)
+    e.preventDefault();
 
-    // 2. අපි ඉන්නේ Home Page ('/') එකේ ද කියලා බලනවා
-    if (location.pathname === '/') {
-      // Home Page එකේ නම්, කෙලින්ම Scroll කරන්න
+    if (location.pathname === '/portfolio' || location.pathname === '/') {
       const id = targetId.replace('#', '');
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // අපි ඉන්නේ වෙන පිටුවක නම් (උදා: Art Portfolio), Home Page එකට යන්න
-      navigate('/');
-      // Home Page එකට ගිය පසු උඩටම Scroll වෙන්න App.js එකේ Logic එකක් දාලා තියෙන නිසා එය ඉබේම වෙයි.
+      navigate('/portfolio');
+      setTimeout(() => {
+        const id = targetId.replace('#', '');
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
     }
   };
 
@@ -33,12 +33,11 @@ const Footer = () => {
         </div>
 
         <div className="footer-links">
-          <a href="#home">Home</a>
+          <a href="#home" onClick={(e) => handleNavigation(e, '#home')}>Home</a>
           <a href="#about" onClick={(e) => handleNavigation(e, '#about')}>About</a>
           <a href="#projects" onClick={(e) => handleNavigation(e, '#projects')}>Projects</a>
           <a href="#skills" onClick={(e) => handleNavigation(e, '#skills')}>Skills</a>
           <a href="#contact" onClick={(e) => handleNavigation(e, '#contact')}>Contact</a>
-
         </div>
 
         <div className="footer-newsletter">
