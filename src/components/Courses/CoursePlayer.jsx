@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import '../../styles/coursePlayer.css';
 import LandingFooter from '../Landing/LandingFooter';
 import { supabase } from '../../supabase';
+import { useAuth } from '../Auth/AuthContext';
 
 const CoursePlayer = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
+  const { user } = useAuth();
 
   // Player State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -220,6 +222,32 @@ const CoursePlayer = () => {
     return `${min}:${sec < 10 ? '0' + sec : sec}`;
   };
 
+  const handleEnrollClick = async () => {
+    if (!user) {
+      alert("Please login first to enroll in this course.");
+      return;
+    }
+
+    // Insert pending enrollment if one doesn't already exist
+    const { data: existing } = await supabase
+      .from('user_enrollments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('course_id', course.id)
+      .single();
+
+    if (!existing) {
+      await supabase.from('user_enrollments').insert({
+        user_id: user.id,
+        course_id: course.id,
+        access_status: 'pending'
+      });
+    }
+
+    const message = `Hi Namal, I am ${user.user_metadata?.full_name || user.email || 'a student'} and I want to enroll in the course: ${course.title}. Here is my payment slip:`;
+    window.open(`https://wa.me/94770311025?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   if (!course) return <div className="loading-msg" style={{ color: 'white', padding: '50px' }}>Loading...</div>;
 
   return (
@@ -243,9 +271,9 @@ const CoursePlayer = () => {
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
                   <h3 style={{ fontSize: '24px', marginBottom: '10px' }}>Demo Completed (15 mins)</h3>
                   <p style={{ marginBottom: '20px', color: '#ccc' }}>Please enroll to continue watching the rest of this course.</p>
-                  <a href={`https://wa.me/94770311025?text=Hi%20Namal,%20I%20want%20to%20enroll%20in%20the%20course:%20${course?.title}.%20Here%20is%20my%20payment%20slip:`} target="_blank" rel="noreferrer" style={{ backgroundColor: '#25D366', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>
+                  <button onClick={handleEnrollClick} style={{ backgroundColor: '#25D366', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>
                     Enroll via WhatsApp
-                  </a>
+                  </button>
                 </div>
               )}
 

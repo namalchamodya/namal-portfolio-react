@@ -12,16 +12,36 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const syncProfile = async (sessionUser) => {
+            if (!sessionUser) return;
+            const fullName = sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name || 'User';
+            const avatarUrl = sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture || null;
+
+            // Force synchronize User info to public.profiles table
+            const { error } = await supabase.from('profiles').upsert({
+                id: sessionUser.id,
+                full_name: fullName,
+                avatar_url: avatarUrl,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+
+            if (error) console.error("Error auto-syncing profile:", error.message);
+        };
+
         // Check active sessions and sets the user
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+            const sessionUser = session?.user ?? null;
+            setUser(sessionUser);
             setLoading(false);
+            if (sessionUser) syncProfile(sessionUser);
         });
 
         // Listen for changes on auth state (log in, log out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+            const sessionUser = session?.user ?? null;
+            setUser(sessionUser);
             setLoading(false);
+            if (sessionUser) syncProfile(sessionUser);
         });
 
         return () => subscription.unsubscribe();
