@@ -11,15 +11,14 @@ const projects = [
     href: '/art-portfolio', 
     tags: ['Photoshop', 'Clip Studio Paint', 'Pencil Drawing'] 
   },
-
-  { 
+  {
     id: 2, 
-    title: 'University Website', 
-    description: 'Modern UI component library', 
-    image: process.env.PUBLIC_URL + '/projece2.png', 
-    alt: 'University Web', 
-    href: 'https://github.com/namalchamodya/University-web', 
-    tags: ['React', 'SCSS'] 
+    title: 'ENCi Pet Robot', 
+    description: 'Pet robot using FreeRTOS, TFLite wake-word, and Gemini API for smooth HRI.', 
+    image: process.env.PUBLIC_URL + '/ENCI.png', 
+    alt: 'ENCi Pet Robot', 
+    href: 'https://enci.vercel.app/', 
+    tags: ['ESP32', 'RTOS', 'TensorFlow Lite'] 
   },
   { 
     id: 3, 
@@ -65,6 +64,15 @@ const projects = [
     alt: 'Nova-med', 
     href: '#', 
     tags: ['Three.js', 'WebGL'] 
+  },
+  { 
+    id: 8, 
+    title: 'University Website', 
+    description: 'Modern UI component library', 
+    image: process.env.PUBLIC_URL + '/projece2.png', 
+    alt: 'University Web', 
+    href: 'https://github.com/namalchamodya/University-web', 
+    tags: ['React', 'SCSS'] 
   },
 
 ];

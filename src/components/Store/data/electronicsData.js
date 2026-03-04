@@ -30,7 +30,7 @@ export const ELECTRONICS_DATA = [
         "High precision"
       ],
       images: [
-        "https://plus.unsplash.com/premium_photo-1678565869434-c81195861939?q=80&w=1000&auto=format&fit=crop"
+        "https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2021/06/HC-SR04-Ultrasonic-Sensor-Module-Distance-Measurement-Component-Part-Front.jpg?resize=750%2C422&quality=100&strip=all&ssl=1"
       ],
       inStock: true
     },
@@ -64,7 +64,7 @@ export const ELECTRONICS_DATA = [
         "Rich Peripherals"
       ],
       images: [
-        "https://images.unsplash.com/photo-1631557007722-e2a2202687c4?q=80&w=1000&auto=format&fit=crop"
+        "https://img.drz.lazcdn.com/static/lk/p/f1b6212c368de660b1cda87bbe1bf520.jpg_720x720q80.jpg"
       ],
       inStock: true
     },

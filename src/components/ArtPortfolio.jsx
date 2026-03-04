@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import '../styles/artportfolio.css';
 import LandingFooter from './Landing/LandingFooter';
 
-
 const ARTWORKS = [
-  { id: 1, type: 'graphic', src: process.env.PUBLIC_URL + '/art/digital-art.png', title: 'Brand Identity', price: '$50' },
-  { id: 2, type: 'pencil', src: process.env.PUBLIC_URL + '/art/pencil-art.jpg', title: 'Portrait Sketch', price: '$30' },
-  { id: 3, type: 'graphic', src: process.env.PUBLIC_URL + '/art/Namal_ict.png', title: 'Social Media Kit', price: '$80' },
-  { id: 4, type: 'graphic', src: process.env.PUBLIC_URL + '/art/all designs.jpg', title: 'Realistic Eye', price: '$45' },
-  { id: 5, type: 'graphic', src: process.env.PUBLIC_URL + '/art/2027 al 2.png', title: 'Logo Concept', price: '$100' },
-  { id: 6, type: 'pencil', src: process.env.PUBLIC_URL + '/art/art2.png', title: 'Figure Drawing', price: '$40' },
+  { id: 1, type: 'graphic', src: process.env.PUBLIC_URL + '/art/digital-art.png', title: 'Digital Art Package', price: '$50' },
+  { id: 2, type: 'pencil', src: process.env.PUBLIC_URL + '/art/pencil-art.jpg', title: 'Pencil Drawing', price: '$30' },
+  { id: 3, type: 'graphic', src: process.env.PUBLIC_URL + '/art/Namal_ict.png', title: 'Social Media Flyer', price: '$30' },
+  { id: 4, type: 'graphic', src: process.env.PUBLIC_URL + '/art/all designs.jpg', title: 'Social Media Kit', price: '$80' },
+  { id: 5, type: 'graphic', src: process.env.PUBLIC_URL + '/art/2027 al 2.png', title: 'Social Media Marketing', price: '$100' },
+  { id: 6, type: 'pencil', src: process.env.PUBLIC_URL + '/art/art2.png', title: 'Figure Drawing', price: '$30' },
 ];
 
 const ArtPortfolio = () => {
@@ -26,6 +25,19 @@ const ArtPortfolio = () => {
   const filteredArt = filter === 'all' 
     ? ARTWORKS 
     : ARTWORKS.filter(art => art.type === filter);
+
+  // Helper function to handle WhatsApp redirection
+  const handleWhatsApp = (itemTitle = '', isEmail = false) => {
+    // If specific email option is needed in logic, it can be handled here, 
+    // but default is WhatsApp as requested for buttons.
+    const phoneNumber = '94770311025'; // Sri Lanka code +94
+    const message = itemTitle 
+      ? `Hi, I would like to order/discuss the: ${itemTitle}` 
+      : `Hi, I'm interested in your art and designs.`;
+    
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="art-page">
@@ -50,7 +62,7 @@ const ArtPortfolio = () => {
               <span>Happy Clients</span>
             </div>
           </div>
-          <button className="cta-button" onClick={() => document.getElementById('pricing').scrollIntoView()}>
+          <button className="cta-button" onClick={() => handleWhatsApp('General Art Inquiry')}>
             Buy Art & Designs
           </button>
         </div>
@@ -77,7 +89,9 @@ const ArtPortfolio = () => {
               <div className="item-overlay">
                 <h4>{item.title}</h4>
                 <p>{item.price}</p>
-                <button className="buy-btn">Buy Now</button>
+                <button className="buy-btn" onClick={() => handleWhatsApp(item.title)}>
+                  Buy Now
+                </button>
               </div>
             </div>
           ))}
@@ -101,7 +115,9 @@ const ArtPortfolio = () => {
               <li>A4 / A3 Size</li>
               <li>Realistic Shading</li>
             </ul>
-            <button className="price-btn">Order Now</button>
+            <button className="price-btn" onClick={() => handleWhatsApp('Pencil Sketch Package ($30)')}>
+              Order Now
+            </button>
           </div>
 
           {/* Card 2: Featured (Orange) */}
@@ -115,7 +131,9 @@ const ArtPortfolio = () => {
               <li>Unlimited Revisions</li>
               <li>Source Files Included</li>
             </ul>
-            <button className="price-btn white-btn">Get Started</button>
+            <button className="price-btn white-btn" onClick={() => handleWhatsApp('Graphic Design Package ($100)')}>
+              Get Started
+            </button>
           </div>
 
           {/* Card 3: Premium */}
@@ -127,19 +145,29 @@ const ArtPortfolio = () => {
               <li>Commercial Rights</li>
               <li>Priority Support</li>
             </ul>
-            <button className="price-btn">Contact Me</button>
+            <button className="price-btn" onClick={() => handleWhatsApp('Full Portfolio Bundle ($250)')}>
+              Contact Me
+            </button>
           </div>
         </div>
       </section>
 
       {/* --- Contact Section --- */}
       <section className="art-contact">
-        <div className="  -box">
+        <div className="contact-box">
           <h2>Ready to make something amazing?</h2>
           <p>Let's collaborate on your next project.</p>
-          <a href="mailto:namalcg12@gmail.com" className="big-contact-btn">
+          {/* Option to send WhatsApp message provided here, matching the other buttons */}
+          <button 
+            className="big-contact-btn" 
+            onClick={() => handleWhatsApp('New Project Collaboration')}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', textDecoration: 'underline' }}
+          >
             Let's Create ➔
-          </a>
+          </button>
+          <div style={{ marginTop: '10px', fontSize: '0.9rem' }}>
+             Or email: <a href="mailto:namalcg12@gmail.com" style={{ color: '#fff' }}>namalcg12@gmail.com</a>
+          </div>
         </div>
       </section>
       <LandingFooter />
