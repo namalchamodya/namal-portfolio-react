@@ -70,6 +70,40 @@ const CoursesLanding = () => {
     ? courses
     : courses.filter(course => myCourseIds.includes(course.id));
 
+  const handleEnrollClick = async (e, course) => {
+    e.stopPropagation(); // Prevent card from redirecting to course view immediately
+
+    // If it's already in the user's active courses, no need to enroll
+    if (myCourseIds.includes(course.id)) {
+      navigate(`/course/${course.id}`);
+      return;
+    }
+
+    if (!user) {
+      alert("Please login first to enroll in this course.");
+      return;
+    }
+
+    // Insert pending enrollment if one doesn't already exist
+    const { data: existing } = await supabase
+      .from('user_enrollments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('course_id', course.id)
+      .single();
+
+    if (!existing) {
+      await supabase.from('user_enrollments').insert({
+        user_id: user.id,
+        course_id: course.id,
+        access_status: 'pending'
+      });
+    }
+
+    const message = `Hi Namal, I am ${user.user_metadata?.full_name || user.email || 'a student'} and I want to enroll in the course: ${course.title}. Here is my payment slip:`;
+    window.open(`https://wa.me/94770311025?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   return (
     <div className="courses-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
@@ -152,9 +186,15 @@ const CoursesLanding = () => {
                 </div>
 
                 <div className="card-actions">
-                  <Link to={`/course/${course.id}`} className="enroll-btn" style={{ textAlign: 'center', display: 'block', textDecoration: 'none' }}>
-                    Enroll Now - {course.priceFormatted}
-                  </Link>
+                  {myCourseIds.includes(course.id) ? (
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/course/${course.id}`); }} className="enroll-btn" style={{ width: '100%', textAlign: 'center', display: 'block', border: 'none', cursor: 'pointer', background: '#25D366' }}>
+                      Go to Course
+                    </button>
+                  ) : (
+                    <button onClick={(e) => handleEnrollClick(e, course)} className="enroll-btn" style={{ width: '100%', textAlign: 'center', display: 'block', border: 'none', cursor: 'pointer' }}>
+                      Enroll Now - {course.priceFormatted}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
