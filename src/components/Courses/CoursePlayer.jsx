@@ -10,6 +10,8 @@ const CoursePlayer = () => {
   const [course, setCourse] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
   const { user } = useAuth();
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const isEnrolledRef = useRef(false);
 
   // Player State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -45,6 +47,24 @@ const CoursePlayer = () => {
         if (sortedLessons.length > 0) {
           setCurrentLesson(sortedLessons[0]);
         }
+
+        // Active check logic to instantly unlock limits based on Database
+        if (user) {
+          const { data: enrollment } = await supabase
+            .from('user_enrollments')
+            .select('access_status')
+            .eq('user_id', user.id)
+            .eq('course_id', data.id)
+            .single();
+
+          if (enrollment && enrollment.access_status === 'active') {
+            setIsEnrolled(true);
+            isEnrolledRef.current = true;
+          } else {
+            setIsEnrolled(false);
+            isEnrolledRef.current = false;
+          }
+        }
       } else {
         console.error("Error fetching course details:", error);
       }
@@ -52,7 +72,7 @@ const CoursePlayer = () => {
 
     fetchCourse();
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, user]);
 
   // Full Screen
   useEffect(() => {
@@ -155,9 +175,8 @@ const CoursePlayer = () => {
         const time = playerRef.current.getCurrentTime();
         const total = playerRef.current.getDuration();
 
-        // 15-Minute Demo Constraint Logic
-        // In real db, would check enrollment access_status instead of just course_price here
-        if (course && course.price !== 'Free' && time >= 900) {
+        // 15-Minute Demo Constraint Logic natively ignoring enrolled users!
+        if (!isEnrolledRef.current && course && course.price !== 'Free' && time >= 900) {
           playerRef.current.pauseVideo();
           setIsPlaying(false);
           setDemoEnded(true);
@@ -338,12 +357,22 @@ const CoursePlayer = () => {
               {course.lessons.map((lesson, index) => (
                 <li
                   key={lesson.id}
-                  className={`lesson-item ${currentLesson?.id === lesson.id ? 'active' : ''}`}
-                  onClick={() => setCurrentLesson(lesson)}
+                  className={`lesson-item ${currentLesson?.id === lesson.id ? 'active' : ''} ${!isEnrolled && lesson.isLocked ? 'locked' : ''}`}
+                  onClick={() => {
+                    if (!isEnrolled && lesson.isLocked) {
+                      alert("This lesson is locked natively. Please enroll in the course to unlock all sections.");
+                      return;
+                    }
+                    setCurrentLesson(lesson)
+                  }}
+                  style={{ opacity: !isEnrolled && lesson.isLocked ? 0.6 : 1, cursor: !isEnrolled && lesson.isLocked ? 'not-allowed' : 'pointer' }}
                 >
                   <span className="lesson-number">{index + 1}</span>
                   <div className="lesson-details">
-                    <span className="lesson-name">{lesson.title}</span>
+                    <span className="lesson-name">
+                      {!isEnrolled && lesson.isLocked && <span style={{ marginRight: '6px', fontSize: '13px' }}>🔒</span>}
+                      {lesson.title}
+                    </span>
                     <span className="lesson-duration">
                       ⏱ {lessonDurations[lesson.id] || lesson.duration || "--:--"}
                     </span>
