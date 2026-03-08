@@ -57,7 +57,7 @@ const CoursePlayer = () => {
             .eq('course_id', data.id)
             .single();
 
-          if (enrollment && enrollment.access_status === 'active') {
+          if (enrollment && enrollment.access_status && enrollment.access_status.trim().toLowerCase() === 'active') {
             setIsEnrolled(true);
             isEnrolledRef.current = true;
           } else {

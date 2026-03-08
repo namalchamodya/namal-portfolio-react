@@ -51,12 +51,15 @@ const CoursesLanding = () => {
       setLoadingCourses(true);
       const { data, error } = await supabase
         .from('user_enrollments')
-        .select('course_id')
-        .eq('user_id', user.id)
-        .eq('access_status', 'active');
+        .select('course_id, access_status')
+        .eq('user_id', user.id);
 
       if (!error && data) {
-        setMyCourseIds(data.map(e => e.course_id));
+        // Find all courses where access_status is correctly listed as "active", ignoring caps and spaces you might have accidentally used
+        const activeIds = data
+          .filter(e => e.access_status && e.access_status.trim().toLowerCase() === 'active')
+          .map(e => Number(e.course_id));
+        setMyCourseIds(activeIds);
       } else if (error) {
         console.error("Error fetching courses:", error);
       }
@@ -68,13 +71,13 @@ const CoursesLanding = () => {
 
   const displayedCourses = activeTab === 'all'
     ? courses
-    : courses.filter(course => myCourseIds.includes(course.id));
+    : courses.filter(course => myCourseIds.includes(Number(course.id)));
 
   const handleEnrollClick = async (e, course) => {
     e.stopPropagation(); // Prevent card from redirecting to course view immediately
 
     // If it's already in the user's active courses, no need to enroll
-    if (myCourseIds.includes(course.id)) {
+    if (myCourseIds.includes(Number(course.id))) {
       navigate(`/course/${course.id}`);
       return;
     }
@@ -186,7 +189,7 @@ const CoursesLanding = () => {
                 </div>
 
                 <div className="card-actions">
-                  {myCourseIds.includes(course.id) ? (
+                  {myCourseIds.includes(Number(course.id)) ? (
                     <button onClick={(e) => { e.stopPropagation(); navigate(`/course/${course.id}`); }} className="enroll-btn" style={{ width: '100%', textAlign: 'center', display: 'block', border: 'none', cursor: 'pointer', background: '#25D366' }}>
                       Go to Course
                     </button>
