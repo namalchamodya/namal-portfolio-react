@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
+import { useCart } from './CartContext';
+import { useAuth } from '../Auth/AuthContext';
 import '../../styles/store.css';
 
 const ProductModal = ({ product, onClose }) => {
   const [mainImage, setMainImage] = useState(product.images[0]);
+  const { addToCart } = useCart();
+  const { user } = useAuth();
 
   if (!product) return null;
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    onClose();
+  };
+
+  const handleChatNow = () => {
+    const userInfo = user ? `\n\n*Customer Info:*\nName: ${user.user_metadata?.full_name || user.email}` : '';
+    const message = `Hi Namal, I am interested in buying: *${product.name}* (${product.price}).${userInfo}\n\nCould you please provide more details?`;
+    window.open(`https://wa.me/94770311025?text=${encodeURIComponent(message)}`, '_blank');
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -52,8 +67,10 @@ const ProductModal = ({ product, onClose }) => {
             </div>
 
             <div className="modal-actions">
-              <button className="btn-buy-now">Buy Now</button>
-              <button className="btn-chat">Chat on WhatsApp</button>
+              <button className="btn-buy-now" onClick={handleAddToCart}>
+                 Add to Cart
+              </button>
+              <button className="btn-chat" onClick={handleChatNow}>Chat on WhatsApp</button>
             </div>
           </div>
 

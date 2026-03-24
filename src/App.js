@@ -22,6 +22,10 @@ import SoftwareStore from './components/Store/SoftwareStore';
 // Blog pages
 import BlogFeed from './components/Blog/BlogFeed';
 
+// Legal Pages
+import PrivacyPolicy from './components/Legal/PrivacyPolicy';
+import TermsOfService from './components/Legal/TermsOfService';
+
 import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
 import './styles/blackhole.css';
@@ -55,6 +59,8 @@ function App() {
     location.pathname === '/art-portfolio' ||
     location.pathname === '/courses' ||
     location.pathname.startsWith('/store/') ||
+    location.pathname === '/privacy' ||
+    location.pathname === '/terms' ||
     isPlayerPage;
 
   const showGlobalFooter = location.pathname === '/portfolio';
@@ -78,6 +84,10 @@ function App() {
         <Route path="/store/books" element={<BookStore />} />
         <Route path="/store/software" element={<SoftwareStore />} />
         <Route path="/blog" element={<BlogFeed />} />
+        
+        {/* Legal Pages */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         {/* <Route path="/store/electronics/:id" element={<ProductDetails />} /> */}
       </Routes>
 

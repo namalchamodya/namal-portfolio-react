@@ -8,7 +8,7 @@ import '../../styles/landing.css';
 import { supabase } from '../../supabase';
 
 const LandingPage = () => {
-  const [latestCourses, setLatestCourses] = useState([]);
+  const [latestUpdates, setLatestUpdates] = useState([]);
 
   useEffect(() => {
     // Set page title
@@ -24,45 +24,65 @@ const LandingPage = () => {
 
     document.querySelectorAll('.l-fade-in').forEach(el => observer.observe(el));
 
-    // Fetch latest courses
-    const fetchLatestCourses = async () => {
-      const { data } = await supabase
-        .from('courses')
-        .select('*')
-        .order('id', { ascending: false })
-        .limit(2);
+    // Fetch latest courses and products
+    const fetchLatestData = async () => {
+      try {
+        const { data: coursesData } = await supabase
+          .from('courses')
+          .select('*')
+          .order('id', { ascending: false })
+          .limit(2);
 
-      if (data) {
-        setLatestCourses(
-          data.map(course => ({
-            id: `course-${course.id}`,
-            tag: 'Course',
-            title: course.title,
-            date: 'New Release',
-            img: course.thumbnail_url || '/art/Namal_ict.png',
-            link: `/course/${course.id}`
-          }))
-        );
+        const { data: productsData } = await supabase
+          .from('products')
+          .select('*')
+          .order('id', { ascending: false })
+          .limit(1);
+
+        let updates = [];
+
+        if (coursesData) {
+          updates = [
+            ...updates,
+            ...coursesData.map(course => ({
+              id: `course-${course.id}`,
+              tag: 'Course',
+              title: course.title,
+              date: 'New Release',
+              img: course.thumbnail_url || '/art/Namal_ict.png',
+              link: `/course/${course.id}`
+            }))
+          ];
+        }
+
+        if (productsData) {
+          updates = [
+            ...updates,
+            ...productsData.map(prod => {
+              const isSoftware = ['Desktop Apps', 'Web Apps', 'Templates', 'Scripts'].includes(prod.category);
+              const isBook = ['Books', 'Tutes', 'Past Papers', 'Model Papers', 'Monthly Tests'].includes(prod.category);
+              const storeLink = isBook ? '/store/books' : (isSoftware ? '/store/software' : '/store/electronics');
+              
+              return {
+                id: `prod-${prod.id}`,
+                tag: 'Product',
+                title: prod.name,
+                date: 'New Arrival',
+                img: (prod.images && prod.images.length > 0) ? prod.images[0] : 'https://images.unsplash.com/photo-1555664424-778a184335ec?q=80&w=1000&auto=format&fit=crop',
+                link: storeLink
+              };
+            })
+          ];
+        }
+
+        setLatestUpdates(updates);
+      } catch (err) {
+        console.error("Error fetching latest updates:", err);
       }
     };
 
-    fetchLatestCourses();
+    fetchLatestData();
   }, []);
-
-  // Manual Updates (Products / Art)
-  const otherUpdates = [
-    {
-      id: 'prod-1',
-      tag: 'Product',
-      title: 'Arduino Starter Kit - Restocked',
-      date: '5 days ago',
-      img: 'https://images.unsplash.com/photo-1555664424-778a184335ec?q=80&w=1000&auto=format&fit=crop',
-      link: '#store'
-    }
-  ];
-
-
-  const allUpdates = [...latestCourses, ...otherUpdates];
 
   return (
     <div className="landing-page">
@@ -130,7 +150,7 @@ const LandingPage = () => {
       <section className="l-section updates-section l-fade-in">
         <h2 className="l-section-title">Latest <span className="l-highlight">Updates</span></h2>
         <div className="updates-grid">
-          {allUpdates.map((item) => (
+          {latestUpdates.map((item) => (
 
             <Link to={item.link} key={item.id} className="update-card has-img" style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className="card-img-holder">

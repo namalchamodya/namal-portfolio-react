@@ -15,10 +15,9 @@ const LandingFooter = () => {
             Education, and Creative Arts.
           </p>
           <div className="l-socials">
-            <a href="#"><i className="fab fa-facebook-f"></i></a>
-            <a href="#"><i className="fab fa-twitter"></i></a>
-            <a href="#"><i className="fab fa-instagram"></i></a>
-            <a href="#"><i className="fab fa-linkedin-in"></i></a>
+            <a href="https://www.facebook.com/namal.chamodya.2025" target="_blank" rel="noreferrer"><i className="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/na_mal_chamo_d_ya/" target="_blank" rel="noreferrer"><i className="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/in/namalchamodya/" target="_blank" rel="noreferrer"><i className="fab fa-linkedin-in"></i></a>
           </div>
         </div>
 
@@ -61,9 +60,9 @@ const LandingFooter = () => {
       <div className="l-footer-bottom">
         <p>&copy; 2025 Namal Chamodya. All Rights Reserved.</p>
         <div className="l-footer-legal">
-          <p><a href="#">Privacy Policy</a>
+          <p><Link to="/privacy">Privacy Policy</Link>
             <nbps> | </nbps>
-            <a href="#">Terms of Service</a>
+            <Link to="/terms">Terms of Service</Link>
           </p>
         </div>
       </div>

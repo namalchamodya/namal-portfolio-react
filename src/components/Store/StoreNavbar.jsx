@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthContext';
+import { useCart } from './CartContext';
 import LoginProfileButton from '../Auth/LoginProfileButton';
+import CartSidebar from './CartSidebar';
 import '../../styles/store.css';
 
 const StoreNavbar = () => {
@@ -9,6 +11,7 @@ const StoreNavbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, signInWithGoogle, signOut } = useAuth();
+    const { cartItems, toggleCart } = useCart();
 
     const isElectronics = location.pathname.includes('electronics');
     const isBooks = location.pathname.includes('books');
@@ -61,7 +64,11 @@ const StoreNavbar = () => {
                         </Link>
                     </div>
 
-                    <div className="nav-right">
+                    <div className="nav-right" style={{ display: 'flex', alignItems: 'center' }}>
+                        <button className="cart-icon-btn" onClick={toggleCart}>
+                            🛒
+                            {cartItems.length > 0 && <span className="cart-badge">{cartItems.reduce((acc, item) => acc + item.quantity, 0)}</span>}
+                        </button>
                         <LoginProfileButton />
                     </div>
                 </div>
@@ -98,6 +105,9 @@ const StoreNavbar = () => {
                     </div>
 
                     <div className="panel-actions">
+                        <button className="btn-back full-width" onClick={toggleCart} style={{ marginBottom: '10px', background: '#ffc107', color: '#000', border: 'none' }}>
+                            🛒 View Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
+                        </button>
                         <LoginProfileButton />
                         <button className="btn-back full-width" onClick={() => navigate('/')}>
                             ← Back to Home
@@ -107,6 +117,7 @@ const StoreNavbar = () => {
 
                 {isMenuOpen && <div className="menu-backdrop" onClick={toggleMenu}></div>}
 
+                <CartSidebar />
             </div>
         </nav>
     );

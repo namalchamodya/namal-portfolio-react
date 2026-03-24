@@ -273,7 +273,7 @@ const CoursePlayer = () => {
     <div className="course-page-wrapper">
       <div className="player-container">
         <div className="player-nav">
-          <Link to="/courses" className="back-btn">← Back to Courses</Link>
+          <Link to="/courses" className="back-btn">← Back</Link>
           <h2>{course.title}</h2>
         </div>
 

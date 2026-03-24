@@ -40,10 +40,9 @@ const Contact = () => {
 
           <div className="contact-social">
             <a href="https://github.com/namalchamodya" target="_blank" rel="noreferrer"><i className="fab fa-github"></i></a>
-            <a href="https://www.linkedin.com/in/namalchamodya" target="_blank" rel="noreferrer"><i className="fab fa-linkedin"></i></a>
-            <a href="#"><i className="fab fa-dribbble"></i></a>
+            <a href="https://www.linkedin.com/in/namalchamodya/" target="_blank" rel="noreferrer"><i className="fab fa-linkedin"></i></a>
+            <a href="https://www.facebook.com/namal.chamodya.2025" target="_blank" rel="noreferrer"><i className="fab fa-facebook-f"></i></a>
             <a href="https://www.instagram.com/na_mal_chamo_d_ya/" target="_blank" rel="noreferrer"><i className="fab fa-instagram"></i></a>
-            <a href="https://www.facebook.com/namal.chamodya.2025/" target="_blank" rel="noreferrer"><i className="fab fa-facebook"></i></a>
           </div>
         </div>
 
