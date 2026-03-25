@@ -28,7 +28,7 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setIsCartOpen(true); // Auto open cart when item added
+    // No auto-open: user navigates to /store/cart to view
   };
 
   const removeFromCart = (id) => {

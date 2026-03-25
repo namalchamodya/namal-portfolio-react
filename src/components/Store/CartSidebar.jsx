@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { useCart } from './CartContext';
 import { useAuth } from '../Auth/AuthContext';
 import '../../styles/store.css';
@@ -37,7 +38,7 @@ const CartSidebar = () => {
     // clearCart();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <>
       <div className={`cart-backdrop ${isCartOpen ? 'open' : ''}`} onClick={toggleCart}></div>
       <div className={`cart-sidebar ${isCartOpen ? 'open' : ''}`}>
@@ -87,7 +88,8 @@ const CartSidebar = () => {
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 

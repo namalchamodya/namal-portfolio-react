@@ -18,6 +18,7 @@ import CoursePlayer from './components/Courses/CoursePlayer';
 import ElectronicsStore from './components/Store/ElectronicsStore';
 import BookStore from './components/Store/BookStore';
 import SoftwareStore from './components/Store/SoftwareStore';
+import CartPage from './components/Store/CartPage';
 
 // Blog pages
 import BlogFeed from './components/Blog/BlogFeed';
@@ -83,6 +84,7 @@ function App() {
         <Route path="/store/electronics" element={<ElectronicsStore />} />
         <Route path="/store/books" element={<BookStore />} />
         <Route path="/store/software" element={<SoftwareStore />} />
+        <Route path="/store/cart" element={<CartPage />} />
         <Route path="/blog" element={<BlogFeed />} />
         
         {/* Legal Pages */}
