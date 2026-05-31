@@ -9,6 +9,8 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,22 +27,44 @@ export const AuthProvider = ({ children }) => {
             }, { onConflict: 'id' });
 
             if (error) console.error("Error auto-syncing profile:", error.message);
+
+            // Fetch profile to check if the user is an admin
+            const { data, error: fetchError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', sessionUser.id)
+                .single();
+
+            if (data && !fetchError) {
+                setProfile(data);
+                setIsAdmin(data.is_admin || false);
+            }
         };
 
         // Check active sessions and sets the user
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
             const sessionUser = session?.user ?? null;
             setUser(sessionUser);
+            if (sessionUser) {
+                await syncProfile(sessionUser);
+            } else {
+                setProfile(null);
+                setIsAdmin(false);
+            }
             setLoading(false);
-            if (sessionUser) syncProfile(sessionUser);
         });
 
         // Listen for changes on auth state (log in, log out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const sessionUser = session?.user ?? null;
             setUser(sessionUser);
+            if (sessionUser) {
+                await syncProfile(sessionUser);
+            } else {
+                setProfile(null);
+                setIsAdmin(false);
+            }
             setLoading(false);
-            if (sessionUser) syncProfile(sessionUser);
         });
 
         return () => subscription.unsubscribe();
@@ -59,10 +83,14 @@ export const AuthProvider = ({ children }) => {
     const signOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) console.error("Error logging out:", error.message);
+        setProfile(null);
+        setIsAdmin(false);
     };
 
     const value = {
         user,
+        profile,
+        isAdmin,
         signInWithGoogle,
         signOut
     };
