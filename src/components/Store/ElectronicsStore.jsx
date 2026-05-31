@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ELECTRONICS_DATA } from './data/electronicsData';
 import { supabase } from '../../supabase';
 import StoreNavbar from './StoreNavbar';
 import LandingFooter from '../Landing/LandingFooter';
@@ -9,7 +8,8 @@ import '../../styles/store.css';
 
 const ElectronicsStore = () => {
   const [items, setItems] = useState([]);
-  const [allProducts, setAllProducts] = useState(ELECTRONICS_DATA); // fallback data
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -21,13 +21,13 @@ const ElectronicsStore = () => {
   useEffect(() => {
     // Set page title
     document.title = "Namal Chamodya | Electronics Store";
-
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
     // Fetch from Supabase
     const fetchStoreData = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase.from('products').select('*');
         if (data && data.length > 0 && !error) {
@@ -35,15 +35,13 @@ const ElectronicsStore = () => {
           const electronicsData = data.filter(item => !nonElectronicsCats.includes(item.category));
           setAllProducts(electronicsData);
           setItems(electronicsData);
-        } else {
-          // Fallback if no supabase table configured yet
-          setAllProducts(ELECTRONICS_DATA);
-          setItems(ELECTRONICS_DATA);
+        } else if (error) {
+          console.error("Error querying electronics:", error.message);
         }
       } catch (err) {
-        setAllProducts(ELECTRONICS_DATA);
-        setItems(ELECTRONICS_DATA);
+        console.error("Error fetching electronics:", err);
       }
+      setLoading(false);
     };
 
     fetchStoreData();
@@ -107,7 +105,11 @@ const ElectronicsStore = () => {
         {/* Product Grid */}
         <main className="store-products">
           <div className="products-grid">
-            {items.length > 0 ? (
+            {loading ? (
+              <div style={{ color: '#fff', width: '100%', padding: '20px', textAlign: 'center', gridColumn: '1/-1' }}>
+                <h3>Loading items...</h3>
+              </div>
+            ) : items.length > 0 ? (
               items.map((item) => (
                 <div
                   key={item.id}

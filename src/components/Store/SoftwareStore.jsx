@@ -1,28 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { SOFTWARE_DATA } from './data/softwareData';
+import { supabase } from '../../supabase';
 import StoreNavbar from './StoreNavbar';
 import LandingFooter from '../Landing/LandingFooter';
 import ProductModal from './ProductModal';
 import '../../styles/store.css';
 
 const SoftwareStore = () => {
-  const [items, setItems] = useState(SOFTWARE_DATA);
+  const [allProducts, setAllProducts] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const categories = ['All', ...new Set(SOFTWARE_DATA.map(item => item.category))];
+  const categories = ['All', ...new Set(allProducts.map(item => item.category))];
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    const fetchSoftwareData = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+
+        if (data && !error) {
+          const softwareCats = ['Desktop Apps', 'Web Apps', 'Templates', 'Scripts'];
+          const filteredSoftware = data.filter(item => softwareCats.includes(item.category));
+          setAllProducts(filteredSoftware);
+          setItems(filteredSoftware);
+        } else if (error) {
+          console.error("Error querying software:", error.message);
+        }
+      } catch (err) {
+        console.error("Error fetching software:", err);
+      }
+      setLoading(false);
+    };
+
+    fetchSoftwareData();
   }, []);
 
   useEffect(() => {
     // Set page title
     document.title = "Namal Chamodya | Software Store";
 
-    let filtered = SOFTWARE_DATA;
+    let filtered = allProducts;
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(item => item.category === selectedCategory);
     }
@@ -32,7 +57,7 @@ const SoftwareStore = () => {
       );
     }
     setItems(filtered);
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, allProducts]);
 
   return (
     <div className="store-page">
@@ -76,7 +101,11 @@ const SoftwareStore = () => {
         {/* Product Grid */}
         <main className="store-products">
           <div className="products-grid">
-            {items.length > 0 ? (
+            {loading ? (
+              <div style={{ color: '#fff', width: '100%', padding: '20px', textAlign: 'center', gridColumn: '1/-1' }}>
+                <h3>Loading software...</h3>
+              </div>
+            ) : items.length > 0 ? (
               items.map((item) => (
                 <div 
                   key={item.id} 

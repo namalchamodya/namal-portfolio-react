@@ -1,28 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BOOK_DATA } from './data/bookData';
+import { supabase } from '../../supabase';
 import StoreNavbar from './StoreNavbar';
 import LandingFooter from '../Landing/LandingFooter';
 import ProductModal from './ProductModal';
 import '../../styles/store.css';
 
 const BookStore = () => {
-  const [items, setItems] = useState(BOOK_DATA);
+  const [allProducts, setAllProducts] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Scroll to top on load
+  // Scroll to top and fetch data on load
   useEffect(() => {
-    // Set page title
     document.title = "Namal Chamodya | Knowledge Base";
-
     window.scrollTo(0, 0);
+
+    const fetchBooksData = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+        
+        if (data && !error) {
+          const bookCats = ['Books', 'Tutes', 'Past Papers', 'Model Papers', 'Monthly Tests'];
+          const filteredBooks = data.filter(item => bookCats.includes(item.category));
+          setAllProducts(filteredBooks);
+          setItems(filteredBooks);
+        } else if (error) {
+          console.error("Error query books:", error.message);
+        }
+      } catch (err) {
+        console.error("Error fetching books:", err);
+      }
+      setLoading(false);
+    };
+
+    fetchBooksData();
   }, []);
 
   // Filter Logic
   useEffect(() => {
-    let filtered = BOOK_DATA;
+    let filtered = allProducts;
 
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(item => item.category === selectedCategory);
@@ -35,7 +58,7 @@ const BookStore = () => {
     }
 
     setItems(filtered);
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, allProducts]);
 
   // Click Handler
   const handleItemClick = (item) => {
@@ -105,7 +128,11 @@ const BookStore = () => {
           </h2>
 
           <div className="products-grid">
-            {items.length > 0 ? (
+            {loading ? (
+              <div style={{ color: '#fff', width: '100%', padding: '20px', textAlign: 'center', gridColumn: '1/-1' }}>
+                <h3>Loading resources...</h3>
+              </div>
+            ) : items.length > 0 ? (
               items.map((item) => (
                 <div 
                   key={item.id} 

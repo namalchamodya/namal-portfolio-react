@@ -9,8 +9,8 @@ import { supabase } from '../../supabase';
 // --- Custom SVG Performance Chart Component ---
 const StudentMarksGraph = ({ marks }) => {
   // Sort marks by paper name naturally (e.g. Paper 1, Paper 2, Paper 10)
-  const sortedMarks = [...marks].sort((a, b) => 
-    a.paper_name.localeCompare(b.paper_name, undefined, { numeric: true, sensitivity: 'base' })
+  const sortedMarks = [...(marks || [])].sort((a, b) => 
+    (a.paper_name || '').localeCompare(b.paper_name || '', undefined, { numeric: true, sensitivity: 'base' })
   );
 
   if (sortedMarks.length === 0) return null;
@@ -30,7 +30,8 @@ const StudentMarksGraph = ({ marks }) => {
   const points = sortedMarks.map((item, index) => {
     const x = paddingLeft + (sortedMarks.length > 1 ? (index * plotWidth) / (sortedMarks.length - 1) : plotWidth / 2);
     // Marks are out of 100
-    const y = paddingTop + plotHeight - (item.marks * plotHeight) / 100;
+    const marksVal = Number(item.marks) || 0;
+    const y = paddingTop + plotHeight - (marksVal * plotHeight) / 100;
     return { x, y, ...item };
   });
 
@@ -190,31 +191,52 @@ const CoursesLanding = () => {
   const [deletingMarkId, setDeletingMarkId] = useState(null);
   const [filterText, setFilterText] = useState('');
 
+  // Admin Course Management State
+  const [editingCourse, setEditingCourse] = useState(null); // null, 'new', or course object
+  const [courseFormData, setCourseFormData] = useState({
+    title: '',
+    description: '',
+    thumbnail_url: '',
+    price_tier: 'paid',
+    price: 0
+  });
+  const [courseFormMessage, setCourseFormMessage] = useState(null);
+  const [savingCourse, setSavingCourse] = useState(false);
+
+  // Lesson Management State
+  const [editingLesson, setEditingLesson] = useState(null); // null, 'new', or lesson object
+  const [lessonFormData, setLessonFormData] = useState({
+    title: '',
+    isLocked: true,
+    videoId: '',
+    duration: '00:00',
+    order_index: 0
+  });
+  const [savingLesson, setSavingLesson] = useState(false);
+
   // 1. Fetch All Courses (Standard Content)
+  const fetchAllCourses = async () => {
+    setLoadingAllCourses(true);
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*, course_lessons(*)');
+
+    if (data && !error) {
+      const formattedData = data.map(c => ({
+        ...c,
+        lessons: (c.course_lessons || []).sort((a, b) => a.order_index - b.order_index),
+        thumbnail: c.thumbnail_url || '/art/Namal_ict.png',
+        priceFormatted: c.price == 0 ? "Free" : `LKR ${Number(c.price).toLocaleString()}`
+      }));
+      setCourses(formattedData);
+    } else if (error) {
+      console.error("Error fetching courses data:", error);
+    }
+    setLoadingAllCourses(false);
+  };
   useEffect(() => {
     document.title = "Namal Chamodya | Learning Hub";
     window.scrollTo(0, 0);
-
-    const fetchAllCourses = async () => {
-      setLoadingAllCourses(true);
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*, course_lessons(*)');
-
-      if (data && !error) {
-        const formattedData = data.map(c => ({
-          ...c,
-          lessons: (c.course_lessons || []).sort((a, b) => a.order_index - b.order_index),
-          thumbnail: c.thumbnail_url || '/art/Namal_ict.png',
-          priceFormatted: c.price == 0 ? "Free" : `LKR ${Number(c.price).toLocaleString()}`
-        }));
-        setCourses(formattedData);
-      } else if (error) {
-        console.error("Error fetching courses data:", error);
-      }
-      setLoadingAllCourses(false);
-    };
-
     fetchAllCourses();
   }, []);
 
@@ -248,7 +270,7 @@ const CoursesLanding = () => {
   // 3. Fetch Student's Own Marks (Exams Tab - Student View)
   useEffect(() => {
     const fetchStudentMarks = async () => {
-      if (!user || activeTab !== 'exams' || isAdmin) return;
+      if (!user || !user.email || activeTab !== 'exams' || isAdmin) return;
       setLoadingMarks(true);
       const { data, error } = await supabase
         .from('student_marks')
@@ -256,7 +278,7 @@ const CoursesLanding = () => {
         .eq('student_email', user.email.trim().toLowerCase());
 
       if (data && !error) {
-        setStudentMarks(data);
+        setStudentMarks(data || []);
       } else if (error) {
         console.error("Error fetching student marks:", error);
       }
@@ -441,7 +463,7 @@ const CoursesLanding = () => {
       );
     }
 
-    if (studentMarks.length === 0) {
+    if (!studentMarks || studentMarks.length === 0) {
       return (
         <div className="exams-empty-state">
           <h3>No Exam Marks Found</h3>
@@ -451,9 +473,9 @@ const CoursesLanding = () => {
     }
 
     const totalExams = studentMarks.length;
-    const totalMarksSum = studentMarks.reduce((sum, item) => sum + Number(item.marks), 0);
-    const averageScore = Math.round(totalMarksSum / totalExams);
-    const highestScore = Math.max(...studentMarks.map(item => Number(item.marks)));
+    const totalMarksSum = studentMarks.reduce((sum, item) => sum + (Number(item.marks) || 0), 0);
+    const averageScore = totalExams > 0 ? Math.round(totalMarksSum / totalExams) : 0;
+    const highestScore = totalExams > 0 ? Math.max(...studentMarks.map(item => Number(item.marks) || 0)) : 0;
 
     return (
       <div className="exams-student-dash">
@@ -487,7 +509,7 @@ const CoursesLanding = () => {
               </thead>
               <tbody>
                 {[...studentMarks]
-                  .sort((a, b) => b.paper_name.localeCompare(a.paper_name, undefined, { numeric: true, sensitivity: 'base' }))
+                  .sort((a, b) => (b.paper_name || '').localeCompare(a.paper_name || '', undefined, { numeric: true, sensitivity: 'base' }))
                   .map((item) => (
                     <tr key={item.id}>
                       <td className="paper-cell">{item.paper_name}</td>
@@ -738,6 +760,412 @@ const CoursesLanding = () => {
     );
   };
 
+  // --- Admin Course Management Handlers ---
+
+  const handleEditCourse = (course) => {
+    setEditingCourse(course);
+    setCourseFormData({
+      title: course.title || '',
+      description: course.description || '',
+      thumbnail_url: course.thumbnail_url || '',
+      price_tier: course.price_tier || 'paid',
+      price: course.price || 0
+    });
+    setCourseFormMessage(null);
+  };
+
+  const handleSaveCourse = async (e) => {
+    e.preventDefault();
+    setSavingCourse(true);
+    setCourseFormMessage(null);
+
+    const isNew = editingCourse === 'new';
+    
+    // First, let's figure out what ID to use if it's new.
+    // Assuming Supabase courses.id is an integer. If it's not auto-generated, we might need to get max ID.
+    // For safety, we will try to insert without ID to see if Supabase generates it. 
+    // If not, it will throw an error and we can generate one.
+    let payload = {
+      title: courseFormData.title,
+      description: courseFormData.description,
+      thumbnail_url: courseFormData.thumbnail_url,
+      price_tier: courseFormData.price_tier,
+      price: parseFloat(courseFormData.price) || 0
+    };
+
+    let errorResult = null;
+    let newCourseData = null;
+
+    if (isNew) {
+      // If the ID is not generated automatically, we might have to get max ID + 1. Let's try max id just in case.
+      const { data: maxIdData } = await supabase.from('courses').select('id').order('id', { ascending: false }).limit(1);
+      const nextId = (maxIdData && maxIdData.length > 0) ? parseInt(maxIdData[0].id) + 1 : 1;
+      payload.id = nextId;
+
+      const { data, error } = await supabase.from('courses').insert(payload).select().single();
+      errorResult = error;
+      newCourseData = data;
+    } else {
+      const { data, error } = await supabase.from('courses').update(payload).eq('id', editingCourse.id).select().single();
+      errorResult = error;
+      newCourseData = data;
+    }
+
+    if (errorResult) {
+      setCourseFormMessage({ type: 'error', text: 'Error saving course: ' + errorResult.message });
+    } else {
+      setCourseFormMessage({ type: 'success', text: 'Course saved successfully!' });
+      await fetchAllCourses();
+      
+      // Update editing course state with new data so lessons manager knows the new ID
+      if (isNew && newCourseData) {
+        setEditingCourse({ ...newCourseData, lessons: [] });
+      } else if (!isNew) {
+        // Keep lessons from previous state
+        setEditingCourse(prev => ({ ...prev, ...payload }));
+      }
+    }
+    setSavingCourse(false);
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm("Are you sure you want to delete this course? This will also delete all associated lessons and enrollments. This cannot be undone.")) return;
+    
+    // In a real scenario we'd cascade delete lessons and enrollments. Supabase FK constraint might restrict this.
+    // First let's delete lessons.
+    await supabase.from('course_lessons').delete().eq('course_id', courseId);
+    await supabase.from('user_enrollments').delete().eq('course_id', courseId);
+    
+    const { error } = await supabase.from('courses').delete().eq('id', courseId);
+    if (error) {
+      alert("Error deleting course: " + error.message);
+    } else {
+      fetchAllCourses();
+      if (editingCourse && editingCourse.id === courseId) {
+        setEditingCourse(null);
+      }
+    }
+  };
+
+  const handleEditLesson = (lesson) => {
+    setEditingLesson(lesson);
+    setLessonFormData({
+      title: lesson.title || '',
+      isLocked: lesson.isLocked !== undefined ? lesson.isLocked : true,
+      videoId: lesson.videoId || '',
+      duration: lesson.duration || '00:00',
+      order_index: lesson.order_index || 0
+    });
+  };
+
+  const handleSaveLesson = async (e) => {
+    e.preventDefault();
+    if (!editingCourse || editingCourse === 'new') {
+      alert("Please save the course first before adding lessons.");
+      return;
+    }
+
+    setSavingLesson(true);
+
+    const isNewLesson = !editingLesson;
+    const payload = {
+      course_id: editingCourse.id,
+      title: lessonFormData.title,
+      isLocked: lessonFormData.isLocked,
+      videoId: lessonFormData.videoId,
+      duration: lessonFormData.duration,
+      order_index: lessonFormData.order_index
+    };
+
+    let errorResult;
+
+    if (isNewLesson) {
+      const { error } = await supabase.from('course_lessons').insert(payload);
+      errorResult = error;
+    } else {
+      const { error } = await supabase.from('course_lessons').update(payload).eq('id', editingLesson.id);
+      errorResult = error;
+    }
+
+    if (errorResult) {
+      alert('Error saving lesson: ' + errorResult.message);
+    } else {
+      setEditingLesson(null);
+      setLessonFormData({ title: '', isLocked: true, videoId: '', duration: '00:00', order_index: 0 });
+      // Refresh courses and update the local editingCourse state
+      await fetchAllCourses();
+      
+      // Update local state for editing course
+      const { data } = await supabase.from('course_lessons').select('*').eq('course_id', editingCourse.id).order('order_index');
+      if (data) {
+        setEditingCourse(prev => ({ ...prev, lessons: data }));
+      }
+    }
+    setSavingLesson(false);
+  };
+
+  const handleDeleteLesson = async (lessonId) => {
+    if (!window.confirm("Are you sure you want to delete this lesson?")) return;
+    
+    const { error } = await supabase.from('course_lessons').delete().eq('id', lessonId);
+    if (error) {
+      alert("Error deleting lesson: " + error.message);
+    } else {
+      await fetchAllCourses();
+      const { data } = await supabase.from('course_lessons').select('*').eq('course_id', editingCourse.id).order('order_index');
+      if (data) {
+        setEditingCourse(prev => ({ ...prev, lessons: data }));
+      }
+    }
+  };
+
+  // --- Admin Course Management Render Function ---
+  const renderAdminCourseManager = () => {
+    if (editingCourse) {
+      return (
+        <div className="admin-course-editor">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3>{editingCourse === 'new' ? 'Add New Course' : `Edit Course: ${courseFormData.title}`}</h3>
+            <button className="back-link" onClick={() => setEditingCourse(null)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>
+              ← Back to Courses
+            </button>
+          </div>
+
+          <form onSubmit={handleSaveCourse} className="admin-form">
+            {courseFormMessage && (
+              <div className={`form-alert alert-${courseFormMessage.type}`}>
+                {courseFormMessage.text}
+              </div>
+            )}
+            
+            <div className="form-group">
+              <label>Course Title</label>
+              <input
+                type="text"
+                required
+                value={courseFormData.title}
+                onChange={(e) => setCourseFormData({...courseFormData, title: e.target.value})}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Description</label>
+              <textarea
+                required
+                rows="4"
+                value={courseFormData.description}
+                onChange={(e) => setCourseFormData({...courseFormData, description: e.target.value})}
+              ></textarea>
+            </div>
+
+            <div className="form-group">
+              <label>Thumbnail URL</label>
+              <input
+                type="text"
+                value={courseFormData.thumbnail_url}
+                onChange={(e) => setCourseFormData({...courseFormData, thumbnail_url: e.target.value})}
+                placeholder="e.g. /art/Namal_ict.png"
+              />
+            </div>
+
+            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Price Tier</label>
+                <select 
+                  value={courseFormData.price_tier} 
+                  onChange={(e) => setCourseFormData({...courseFormData, price_tier: e.target.value})}
+                  style={{ width: '100%', padding: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid #333' }}
+                >
+                  <option value="free">Free</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Price (LKR)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={courseFormData.price}
+                  onChange={(e) => setCourseFormData({...courseFormData, price: e.target.value})}
+                  disabled={courseFormData.price_tier === 'free'}
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="form-btn" disabled={savingCourse}>
+              {savingCourse ? 'Saving Course...' : 'Save Course Details'}
+            </button>
+          </form>
+
+          {editingCourse !== 'new' && (
+            <div className="admin-lessons-manager" style={{ marginTop: '40px' }}>
+              <hr style={{ borderColor: '#333', marginBottom: '20px' }} />
+              <h3>Course Lessons</h3>
+              
+              <div className="lesson-list-admin" style={{ marginBottom: '20px' }}>
+                {editingCourse.lessons && editingCourse.lessons.length > 0 ? (
+                  <table className="marks-table">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Title</th>
+                        <th>Locked</th>
+                        <th>Duration</th>
+                        <th>Video ID</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editingCourse.lessons.map(lesson => (
+                        <tr key={lesson.id}>
+                          <td>{lesson.order_index}</td>
+                          <td>{lesson.title}</td>
+                          <td>{lesson.isLocked ? '🔒 Yes' : '🔓 No'}</td>
+                          <td>{lesson.duration}</td>
+                          <td>{lesson.videoId}</td>
+                          <td>
+                            <button className="edit-btn" onClick={() => handleEditLesson(lesson)} style={{ marginRight: '10px', background: 'transparent', border: 'none', color: '#4facfe', cursor: 'pointer' }}>✏️ Edit</button>
+                            <button className="delete-btn" onClick={() => handleDeleteLesson(lesson.id)} style={{ background: 'transparent', border: 'none', color: '#ff4b4b', cursor: 'pointer' }}>🗑 Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p style={{ color: '#888' }}>No lessons added to this course yet.</p>
+                )}
+              </div>
+
+              <div className="admin-card" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                <h4>{editingLesson ? 'Edit Lesson' : 'Add New Lesson'}</h4>
+                <form onSubmit={handleSaveLesson} className="admin-form">
+                  <div className="form-group">
+                    <label>Lesson Title</label>
+                    <input
+                      type="text"
+                      required
+                      value={lessonFormData.title}
+                      onChange={(e) => setLessonFormData({...lessonFormData, title: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Video ID (YouTube etc.)</label>
+                      <input
+                        type="text"
+                        required
+                        value={lessonFormData.videoId}
+                        onChange={(e) => setLessonFormData({...lessonFormData, videoId: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Duration (MM:SS)</label>
+                      <input
+                        type="text"
+                        value={lessonFormData.duration}
+                        onChange={(e) => setLessonFormData({...lessonFormData, duration: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Order Index</label>
+                      <input
+                        type="number"
+                        value={lessonFormData.order_index}
+                        onChange={(e) => setLessonFormData({...lessonFormData, order_index: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1, display: 'flex', alignItems: 'center', paddingTop: '20px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', margin: 0 }}>
+                        <input
+                          type="checkbox"
+                          checked={lessonFormData.isLocked}
+                          onChange={(e) => setLessonFormData({...lessonFormData, isLocked: e.target.checked})}
+                          style={{ width: 'auto', marginRight: '10px' }}
+                        />
+                        Is Locked (Requires Enrollment)
+                      </label>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button type="submit" className="form-btn" disabled={savingLesson} style={{ flex: 1 }}>
+                      {savingLesson ? 'Saving...' : (editingLesson ? 'Update Lesson' : 'Add Lesson')}
+                    </button>
+                    {editingLesson && (
+                      <button type="button" className="form-btn" onClick={() => {
+                        setEditingLesson(null);
+                        setLessonFormData({ title: '', isLocked: true, videoId: '', duration: '00:00', order_index: 0 });
+                      }} style={{ flex: 1, background: '#333' }}>
+                        Cancel Edit
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="admin-course-dash">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3>Manage Courses</h3>
+          <button 
+            className="form-btn" 
+            style={{ width: 'auto', padding: '10px 20px', margin: 0 }}
+            onClick={() => {
+              setEditingCourse('new');
+              setCourseFormData({ title: '', description: '', thumbnail_url: '', price_tier: 'paid', price: 0 });
+              setCourseFormMessage(null);
+            }}
+          >
+            ➕ Add New Course
+          </button>
+        </div>
+
+        {loadingAllCourses ? (
+          <div style={{ textAlign: 'center', padding: '30px', color: '#fff' }}>Loading courses...</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="marks-table">
+              <thead>
+                <tr>
+                  <th>Thumbnail</th>
+                  <th>Course Title</th>
+                  <th>Price</th>
+                  <th>Lessons</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.map(course => (
+                  <tr key={course.id}>
+                    <td>
+                      <img src={course.thumbnail} alt={course.title} style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                    </td>
+                    <td><strong>{course.title}</strong></td>
+                    <td>{course.priceFormatted}</td>
+                    <td>{course.lessons?.length || 0} lessons</td>
+                    <td>
+                      <button className="edit-btn" onClick={() => handleEditCourse(course)} style={{ marginRight: '10px', background: 'transparent', border: 'none', color: '#4facfe', cursor: 'pointer' }}>✏️ Edit</button>
+                      <button className="delete-btn" onClick={() => handleDeleteCourse(course.id)} style={{ background: 'transparent', border: 'none', color: '#ff4b4b', cursor: 'pointer' }}>🗑 Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="courses-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
@@ -777,12 +1205,25 @@ const CoursesLanding = () => {
           >
             Exams
           </button>
+          {isAdmin && (
+            <button
+              className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('admin'); setEditingCourse(null); }}
+              style={{ background: activeTab === 'admin' ? '#ff4b4b' : 'rgba(255, 75, 75, 0.1)', color: activeTab === 'admin' ? '#fff' : '#ff4b4b', borderColor: '#ff4b4b' }}
+            >
+              ⚙️ Manage Courses
+            </button>
+          )}
         </div>
       </header>
 
       {/* --- Page Main Content Area --- */}
       <div style={{ flex: '1', width: '100%' }}>
-        {activeTab === 'exams' ? (
+        {activeTab === 'admin' && isAdmin ? (
+          <div className="admin-container" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+            {renderAdminCourseManager()}
+          </div>
+        ) : activeTab === 'exams' ? (
           <div className="exams-container">
             {!user ? (
               <div className="exams-empty-state">

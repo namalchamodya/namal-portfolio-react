@@ -4,14 +4,19 @@ import { useAuth } from '../Auth/AuthContext';
 import '../../styles/store.css';
 
 const ProductModal = ({ product, onClose }) => {
-  const [mainImage, setMainImage] = useState(product.images[0]);
+  const images = Array.isArray(product?.images) && product.images.length > 0 
+    ? product.images 
+    : ['https://images.unsplash.com/photo-1555664424-778a184335ec?q=80&w=1000&auto=format&fit=crop'];
+  const features = Array.isArray(product?.features) ? product.features : [];
+
+  const [mainImage, setMainImage] = useState(images[0]);
   const { addToCart } = useCart();
   const { user } = useAuth();
 
   if (!product) return null;
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart({ ...product, images });
     onClose();
   };
 
@@ -39,7 +44,7 @@ const ProductModal = ({ product, onClose }) => {
               <img src={mainImage} alt={product.name} />
             </div>
             <div className="modal-thumbnails">
-              {product.images.map((img, idx) => (
+              {images.map((img, idx) => (
                 <img 
                   key={idx} 
                   src={img} 
@@ -62,7 +67,7 @@ const ProductModal = ({ product, onClose }) => {
             <div className="modal-features">
               <h4>Key Features:</h4>
               <ul>
-                {product.features.map((feat, i) => <li key={i}>{feat}</li>)}
+                {features.map((feat, i) => <li key={i}>{feat}</li>)}
               </ul>
             </div>
 

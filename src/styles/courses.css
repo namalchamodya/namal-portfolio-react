@@ -805,6 +805,44 @@
   cursor: not-allowed;
 }
 
+/* Edit Button styling */
+.edit-btn {
+  background: transparent;
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  color: #4facfe;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  background: #4facfe;
+  color: #000;
+}
+
+.edit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Admin Course Editor */
+.admin-course-editor, .admin-course-dash {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.admin-lessons-manager {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  border-radius: 10px;
+}
+
 /* Responsive adjustments for graphs and screens */
 @media (max-width: 768px) {
   .exams-container {

@@ -16,37 +16,51 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const syncProfile = async (sessionUser) => {
             if (!sessionUser) return;
-            const fullName = sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name || 'User';
-            const avatarUrl = sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture || null;
+            try {
+                const fullName = sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name || 'User';
+                const avatarUrl = sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.picture || null;
 
-            // Force synchronize User info to public.profiles table
-            const { error } = await supabase.from('profiles').upsert({
-                id: sessionUser.id,
-                full_name: fullName,
-                avatar_url: avatarUrl
-            }, { onConflict: 'id' });
+                // Force synchronize User info to public.profiles table
+                const { error } = await supabase.from('profiles').upsert({
+                    id: sessionUser.id,
+                    full_name: fullName,
+                    avatar_url: avatarUrl
+                }, { onConflict: 'id' });
 
-            if (error) console.error("Error auto-syncing profile:", error.message);
+                if (error) console.error("Error auto-syncing profile:", error.message);
 
-            // Fetch profile to check if the user is an admin
-            const { data, error: fetchError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', sessionUser.id)
-                .single();
+                // Fetch profile to check if the user is an admin
+                const { data, error: fetchError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', sessionUser.id)
+                    .single();
 
-            if (data && !fetchError) {
-                setProfile(data);
-                setIsAdmin(data.is_admin || false);
+                if (data && !fetchError) {
+                    setProfile(data);
+                    setIsAdmin(!!data.is_admin);
+                } else {
+                    // Fallback to non-admin profile if fetch fails or no profile exists yet
+                    setProfile({
+                        id: sessionUser.id,
+                        full_name: fullName,
+                        avatar_url: avatarUrl,
+                        is_admin: false
+                    });
+                    setIsAdmin(false);
+                }
+            } catch (e) {
+                console.error("Crash during syncProfile:", e);
+                setIsAdmin(false);
             }
         };
 
-        // Check active sessions and sets the user
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
+        // Check active sessions and sets the user (non-blocking)
+        supabase.auth.getSession().then(({ data: { session } }) => {
             const sessionUser = session?.user ?? null;
             setUser(sessionUser);
             if (sessionUser) {
-                await syncProfile(sessionUser);
+                syncProfile(sessionUser).catch(err => console.error("Session sync failed:", err));
             } else {
                 setProfile(null);
                 setIsAdmin(false);
@@ -54,12 +68,12 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         });
 
-        // Listen for changes on auth state (log in, log out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        // Listen for changes on auth state (log in, log out, etc. - non-blocking)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             const sessionUser = session?.user ?? null;
             setUser(sessionUser);
             if (sessionUser) {
-                await syncProfile(sessionUser);
+                syncProfile(sessionUser).catch(err => console.error("Auth state change sync failed:", err));
             } else {
                 setProfile(null);
                 setIsAdmin(false);
