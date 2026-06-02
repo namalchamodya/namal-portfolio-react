@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LandingNavbar from './LandingNavbar';
 import LandingFooter from './LandingFooter';
 import SpaceBackground from './3D/SpaceBackground';
 import Contact from '../Portfolio/Contact';
@@ -87,7 +86,6 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <SpaceBackground />
-      <LandingNavbar />
 
       {/* --- Hero Section --- */}
       <header className="l-hero l-fade-in">

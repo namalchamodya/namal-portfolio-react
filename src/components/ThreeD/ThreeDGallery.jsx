@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ModelViewerCard from './ModelViewerCard';
 import LandingFooter from '../Landing/LandingFooter';
 
@@ -41,6 +41,7 @@ const MY_MODELS = [
 ];
 
 const ThreeDGallery = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     // Set page title
     document.title = "Namal Chamodya | 3D Gallery";
@@ -52,9 +53,9 @@ const ThreeDGallery = () => {
     <>
       <div className="threed-page-container">
         <nav className="threed-navbar">
-          <Link to="/" className="back-button">
+          <button onClick={() => navigate(-1)} className="back-button" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1rem' }}>
             ← Back
-          </Link>
+          </button>
           <h2>NC<span>.3D</span></h2>
         </nav>
 

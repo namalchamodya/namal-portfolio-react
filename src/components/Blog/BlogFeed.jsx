@@ -4,7 +4,6 @@ import LandingFooter from '../Landing/LandingFooter';
 import BlogModal from './BlogModal'; 
 import { BLOG_DATA } from './data/blogData';
 import '../../styles/blog.css';
-import  Blognavbar from './BlogNavbar'
 
 const BlogFeed = () => {
   const [selectedPost, setSelectedPost] = useState(null);
@@ -23,9 +22,7 @@ const BlogFeed = () => {
   };
 
   return (
-    <div className="blog-page">
-      
-      <Blognavbar />
+    <div className="store-page" style={{minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
 
       {/* Hero Section */}
       <header className="blog-hero">

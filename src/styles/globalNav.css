@@ -1,0 +1,330 @@
+/* src/styles/globalNav.css */
+
+.global-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(10, 10, 15, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.global-nav-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.global-logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+}
+
+.global-logo .highlight {
+    color: var(--primary-color, #ffc107);
+}
+
+/* Desktop Links */
+.global-desktop-links {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 40px;
+    margin: 0;
+    padding: 0;
+}
+
+.global-desktop-links li {
+    display: flex;
+    align-items: center;
+}
+
+.global-desktop-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.global-desktop-links a:hover,
+.global-desktop-links a.active {
+    color: var(--primary-color, #ffc107);
+}
+
+/* Dropdowns */
+.global-desktop-links .dropdown-trigger {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.global-desktop-links .dropdown-trigger > span,
+.global-desktop-links .dropdown-trigger > a {
+    color: #ccc;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.global-desktop-links .dropdown-trigger:hover > span,
+.global-desktop-links .dropdown-trigger:hover > a {
+    color: var(--primary-color, #ffc107);
+}
+
+.global-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #111;
+    border-top: 2px solid var(--primary-color, #ffc107);
+    border-radius: 4px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 8px 0;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    z-index: 1000;
+}
+
+.global-desktop-links .dropdown-trigger:hover .global-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.global-dropdown li {
+    padding: 0;
+}
+
+.global-dropdown a {
+    padding: 10px 20px;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: 0.2s ease;
+}
+
+.global-dropdown a:hover {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--primary-color, #ffc107);
+    padding-left: 25px; /* Tree-like indent on hover */
+}
+
+.global-desktop-links .divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 10px;
+}
+
+/* Actions (Cart, Login) */
+.global-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cart-icon-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.cart-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cart-svg-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--primary-color, #ffc107);
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hamburger Icon */
+.global-menu-icon {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+.global-menu-icon .bar {
+    height: 3px;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.global-menu-icon .bar.open:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+}
+.global-menu-icon .bar.open:nth-child(2) {
+    opacity: 0;
+}
+.global-menu-icon .bar.open:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* Side Panel */
+.global-side-panel {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background: #111;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    z-index: 1001;
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.global-side-panel.open {
+    left: 0;
+}
+
+.side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.side-panel-header h2 {
+    color: #fff;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.side-panel-content {
+    padding: 20px;
+}
+
+.side-panel-section {
+    margin-bottom: 25px;
+}
+
+.side-panel-section h3 {
+    color: #666;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 5px;
+}
+
+.side-panel-section a {
+    display: flex;
+    align-items: center;
+    color: #ccc;
+    text-decoration: none;
+    padding: 12px 10px;
+    font-size: 1.05rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin-bottom: 5px;
+}
+
+.side-panel-section a:hover,
+.side-panel-section a.active {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--primary-color, #ffc107);
+}
+
+/* Backdrop */
+.menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+}
+
+/* Responsive */
+@media screen and (max-width: 900px) {
+    .global-desktop-links {
+        display: none;
+    }
+
+    .global-menu-icon {
+        display: flex;
+    }
+
+    .global-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

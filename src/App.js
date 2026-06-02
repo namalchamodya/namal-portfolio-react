@@ -14,6 +14,11 @@ import ArtPortfolio from './components/ArtPortfolio';
 import CoursesLanding from './components/Courses/CoursesLanding';
 import CoursePlayer from './components/Courses/CoursePlayer';
 
+// Import Profile Pages
+import StudentProfile from './components/Auth/StudentProfile';
+import { useAuth } from './components/Auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 // Import Store Pages
 import ElectronicsStore from './components/Store/ElectronicsStore';
 import BookStore from './components/Store/BookStore';
@@ -29,12 +34,26 @@ import TermsOfService from './components/Legal/TermsOfService';
 
 import { setupGSAP } from './utils/gsapSetup';
 import BlackHoleBackground from './components/BlackHoleBackground/BlackHoleBackground.jsx';
+import GlobalNav from './components/Navigation/GlobalNav.jsx';
 import './styles/blackhole.css';
 import './styles/style.css';
 
 function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
+
+  useEffect(() => {
+    // If the user logs in but has no phone number, prompt them once per session
+    if (user && profile && !profile.phone_number) {
+      const hasPrompted = sessionStorage.getItem('profilePrompted');
+      if (!hasPrompted && location.pathname !== '/profile') {
+        sessionStorage.setItem('profilePrompted', 'true');
+        navigate('/profile');
+      }
+    }
+  }, [user, profile, location.pathname, navigate]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1200);
@@ -59,16 +78,20 @@ function App() {
     location.pathname === '/3d-projects' || 
     location.pathname === '/art-portfolio' ||
     location.pathname === '/courses' ||
+    location.pathname === '/profile' ||
     location.pathname.startsWith('/store/') ||
     location.pathname === '/privacy' ||
     location.pathname === '/terms' ||
     isPlayerPage;
 
   const showGlobalFooter = location.pathname === '/portfolio';
+  const showGlobalNav = location.pathname !== '/portfolio' && !isPlayerPage;
 
   return (
     <>
       {!isSpecialPage && <BlackHoleBackground />}
+      
+      {showGlobalNav && <GlobalNav />}
       
       {loading && <Loader />}
       
@@ -81,6 +104,7 @@ function App() {
         <Route path="/art-portfolio" element={<ArtPortfolio />} />
         <Route path="/courses" element={<CoursesLanding />} />
         <Route path="/course/:id" element={<CoursePlayer />} />
+        <Route path="/profile" element={<StudentProfile />} />
         <Route path="/store/electronics" element={<ElectronicsStore />} />
         <Route path="/store/books" element={<BookStore />} />
         <Route path="/store/software" element={<SoftwareStore />} />

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabase';
-import StoreNavbar from './StoreNavbar';
+
 import LandingFooter from '../Landing/LandingFooter';
 import ProductModal from './ProductModal';
+import StoreTabs from './StoreTabs';
 import '../../styles/store.css';
 
 const ElectronicsStore = () => {
@@ -64,12 +65,14 @@ const ElectronicsStore = () => {
     <div className="store-page">
 
       {/* 1. New Navbar */}
-      <StoreNavbar />
+
 
       <div className="store-header" style={{ alignItems: 'center', padding: '40px 20px', textAlign: 'center', color: '#fff' }}>
         <h2>Electronics <span className="highlight">Components</span></h2>
-        <p>Arduino, Sensors, Modules, PCBs, and DIY Kits.</p>
+        <p>Hardware, IoT, and Robotic components for your next project.</p>
       </div>
+
+      <StoreTabs />
 
       <div className="store-layout">
 

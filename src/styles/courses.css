@@ -4,6 +4,7 @@
   color: var(--text-color);
   font-family: 'Poppins', sans-serif;
   padding-bottom: 50px;
+  padding-top: 80px;
 }
 
 /* Navbar */
@@ -380,6 +381,12 @@
     border-color: var(--primary-color);
 }
 
+@media (max-width: 900px) {
+    .course-tabs {
+        display: none !important;
+    }
+}
+
 /* ==========================================================================
    EXAMS & MARKS STYLING
    ========================================================================== */
@@ -641,6 +648,13 @@
 }
 
 /* Forms styling */
+.store-page, .courses-page, .blog-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px;
+}
+
 .admin-form {
   display: flex;
   flex-direction: column;

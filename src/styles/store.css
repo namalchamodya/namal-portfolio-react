@@ -7,6 +7,7 @@
   min-height: 100vh;
   font-family: 'Poppins', sans-serif;
   padding-bottom: 50px;
+  padding-top: 80px;
   cursor: auto !important;
   overflow-x: hidden; /* prevent horizontal scroll on mobile */
 }
@@ -209,6 +210,7 @@
   z-index: 1100;
   display: flex;
   flex-direction: column;
+  padding-top: 80px;
   box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
 }
 
@@ -423,8 +425,9 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 25px;
+  width: 100%;
 }
 
 .prod-card {

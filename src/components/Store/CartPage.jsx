@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
 import { useAuth } from '../Auth/AuthContext';
-import StoreNavbar from './StoreNavbar';
+
 import LandingFooter from '../Landing/LandingFooter';
 import '../../styles/store.css';
 
@@ -51,7 +51,7 @@ const CartPage = () => {
   if (cartItems.length === 0 && !sent) {
     return (
       <div className="store-page">
-        <StoreNavbar />
+
         <div className="cart-page-empty">
           <div className="cart-page-empty-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -73,7 +73,7 @@ const CartPage = () => {
 
   return (
     <div className="store-page">
-      <StoreNavbar />
+
 
       <div className="cart-page-wrapper">
         {/* ─── Header ─── */}

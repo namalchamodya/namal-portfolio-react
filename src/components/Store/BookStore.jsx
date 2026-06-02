@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabase';
-import StoreNavbar from './StoreNavbar';
+
 import LandingFooter from '../Landing/LandingFooter';
 import ProductModal from './ProductModal';
+import StoreTabs from './StoreTabs';
 import '../../styles/store.css';
 
 const BookStore = () => {
@@ -75,13 +76,15 @@ const BookStore = () => {
 
   return (
     <div className="store-page">
-      <StoreNavbar />
+
 
       {/* Hero Header */}
       <div className="store-header" style={{alignItems: 'center', padding: '40px 20px', textAlign: 'center'}}>
         <h2>Knowledge <span className="highlight">Base</span></h2>
-        <p>Your ultimate resource for ICT Books, Tutes, and Exam Papers.</p>
+        <p>E-Books, Study Materials, and Research Publications.</p>
       </div>
+
+      <StoreTabs />
 
       <div className="store-layout">
         

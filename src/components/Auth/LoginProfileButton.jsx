@@ -50,6 +50,9 @@ const LoginProfileButton = () => {
                     </div>
                     <hr className="dropdown-divider" />
                     <div className="dropdown-actions">
+                        <button className="dropdown-item" onClick={() => window.location.href = '/profile'}>
+                            Profile Settings
+                        </button>
                         <button className="dropdown-item" onClick={signOut}>
                             Logout
                         </button>

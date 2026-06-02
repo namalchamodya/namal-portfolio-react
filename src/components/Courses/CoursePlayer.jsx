@@ -273,7 +273,7 @@ const CoursePlayer = () => {
     <div className="course-page-wrapper">
       <div className="player-container">
         <div className="player-nav">
-          <Link to="/courses" className="back-btn">← Back</Link>
+          <button onClick={() => navigate(-1)} className="back-btn" style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}>← Back</button>
           <h2>{course.title}</h2>
         </div>
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../supabase';
-import StoreNavbar from './StoreNavbar';
+
 import LandingFooter from '../Landing/LandingFooter';
 import ProductModal from './ProductModal';
+import StoreTabs from './StoreTabs';
 import '../../styles/store.css';
 
 const SoftwareStore = () => {
@@ -61,13 +62,15 @@ const SoftwareStore = () => {
 
   return (
     <div className="store-page">
-      <StoreNavbar />
+
 
       {/* Unique Header for Software */}
       <div className="store-header" style={{alignItems: 'center', padding: '40px 20px', textAlign: 'center', color: '#fff'}}>
         <h2>Digital <span className="highlight">Software</span></h2>
         <p>Premium Applications, Source Codes, and Web Templates.</p>
       </div>
+
+      <StoreTabs />
 
       <div className="store-layout">
         
