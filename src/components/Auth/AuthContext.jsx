@@ -24,7 +24,8 @@ export const AuthProvider = ({ children }) => {
                 const { error } = await supabase.from('profiles').upsert({
                     id: sessionUser.id,
                     full_name: fullName,
-                    avatar_url: avatarUrl
+                    avatar_url: avatarUrl,
+                    email: sessionUser.email
                 }, { onConflict: 'id' });
 
                 if (error) console.error("Error auto-syncing profile:", error.message);

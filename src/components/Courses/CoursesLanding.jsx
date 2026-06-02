@@ -162,7 +162,7 @@ const StudentMarksGraph = ({ marks }) => {
 const CoursesLanding = () => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'my', 'exams'
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   
   const [myCourseIds, setMyCourseIds] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -332,11 +332,32 @@ const CoursesLanding = () => {
     setSavingMark(true);
     setFormMessage(null);
 
+    const isId = !inputEmail.includes('@');
+    const searchValue = inputEmail.trim();
+
+    // Query profiles to resolve student email and ID
+    let profileQuery = supabase.from('profiles').select('email, student_id');
+    if (isId) {
+      profileQuery = profileQuery.eq('student_id', searchValue).maybeSingle();
+    } else {
+      profileQuery = profileQuery.eq('email', searchValue.toLowerCase()).maybeSingle();
+    }
+
+    const { data: profileData, error: profileError } = await profileQuery;
+    if (profileError || !profileData) {
+      setFormMessage({ type: 'error', text: 'Student not found. Please ensure the email or ID is correct and the student has logged in at least once.' });
+      setSavingMark(false);
+      return;
+    }
+
+    const resolvedEmail = profileData.email;
+    const resolvedId = profileData.student_id;
+
     // Check if the mark already exists for the student & paper combination to update
     const { data: existing, error: checkError } = await supabase
       .from('student_marks')
       .select('id')
-      .eq('student_email', inputEmail.trim().toLowerCase())
+      .eq('student_email', resolvedEmail)
       .eq('paper_name', inputPaper.trim())
       .maybeSingle();
 
@@ -350,13 +371,14 @@ const CoursesLanding = () => {
     if (existing) {
       result = await supabase
         .from('student_marks')
-        .update({ marks: marksValue })
+        .update({ marks: marksValue, student_id: resolvedId })
         .eq('id', existing.id);
     } else {
       result = await supabase
         .from('student_marks')
         .insert({
-          student_email: inputEmail.trim().toLowerCase(),
+          student_email: resolvedEmail,
+          student_id: resolvedId,
           paper_name: inputPaper.trim(),
           marks: marksValue
         });
@@ -365,7 +387,7 @@ const CoursesLanding = () => {
     if (result.error) {
       setFormMessage({ type: 'error', text: 'Database save error: ' + result.error.message });
     } else {
-      setFormMessage({ type: 'success', text: `Saved score of ${marksValue}% for ${inputEmail.trim().toLowerCase()} on ${inputPaper.trim()}.` });
+      setFormMessage({ type: 'success', text: `Saved score of ${marksValue}% for ${resolvedEmail} (ID: ${resolvedId}) on ${inputPaper.trim()}.` });
       setInputPaper('');
       setInputMarks('');
       fetchAllStudentMarks();
@@ -381,15 +403,22 @@ const CoursesLanding = () => {
     setSearchError('');
     setSearchResultMarks([]);
 
-    const { data, error } = await supabase
-      .from('student_marks')
-      .select('*')
-      .eq('student_email', searchEmail.trim().toLowerCase());
+    const searchValue = searchEmail.trim();
+    const isId = !searchValue.includes('@');
+
+    let query = supabase.from('student_marks').select('*');
+    if (isId) {
+      query = query.eq('student_id', searchValue);
+    } else {
+      query = query.eq('student_email', searchValue.toLowerCase());
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       setSearchError('Error performing search: ' + error.message);
     } else if (!data || data.length === 0) {
-      setSearchError('No records found for this email address.');
+      setSearchError('No records found for this student.');
     } else {
       setSearchResultMarks(data);
     }
@@ -479,6 +508,9 @@ const CoursesLanding = () => {
 
     return (
       <div className="exams-student-dash">
+        <div style={{ textAlign: 'center', marginBottom: '20px', color: '#ccc' }}>
+          {profile?.student_id ? `Your Student ID: ${profile.student_id}` : `Logged in as: ${user?.email}`}
+        </div>
         <div className="stats-bar">
           <div className="stat-card">
             <h4>Exams Taken</h4>
@@ -566,11 +598,11 @@ const CoursesLanding = () => {
               )}
               
               <div className="form-group">
-                <label>Student Email</label>
+                <label>Student Email or ID</label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="e.g. student@gmail.com"
+                  placeholder="e.g. student@gmail.com or 000023"
                   value={inputEmail}
                   onChange={(e) => setInputEmail(e.target.value)}
                 />
@@ -625,9 +657,9 @@ const CoursesLanding = () => {
             <h3>Lookup Student Performance History</h3>
             <form onSubmit={handleSearchStudent} className="search-bar-inline">
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="Enter student email, e.g., student@gmail.com"
+                placeholder="Enter student email or ID, e.g., student@gmail.com or 000023"
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
               />
@@ -693,7 +725,7 @@ const CoursesLanding = () => {
               <h3>Manage All Student Marks ({allStudentMarks.length})</h3>
               <input
                 type="text"
-                placeholder="Filter by Student Email or Paper..."
+                placeholder="Filter by Email, ID, or Paper..."
                 className="table-filter-input"
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
@@ -721,6 +753,7 @@ const CoursesLanding = () => {
                   <thead>
                     <tr>
                       <th>Student Email</th>
+                      <th>Student ID</th>
                       <th>Paper Name</th>
                       <th>Marks</th>
                       <th>Date</th>
@@ -730,12 +763,14 @@ const CoursesLanding = () => {
                   <tbody>
                     {allStudentMarks
                       .filter(item => 
-                        item.student_email.toLowerCase().includes(filterText.toLowerCase()) ||
-                        item.paper_name.toLowerCase().includes(filterText.toLowerCase())
+                        (item.student_email && item.student_email.toLowerCase().includes(filterText.toLowerCase())) ||
+                        (item.student_id && item.student_id.toLowerCase().includes(filterText.toLowerCase())) ||
+                        (item.paper_name && item.paper_name.toLowerCase().includes(filterText.toLowerCase()))
                       )
                       .map((item) => (
                         <tr key={item.id}>
                           <td style={{ color: '#fff', fontWeight: '500' }}>{item.student_email}</td>
+                          <td>{item.student_id || '-'}</td>
                           <td>{item.paper_name}</td>
                           <td><strong>{item.marks} / 100</strong></td>
                           <td>{new Date(item.created_at).toLocaleDateString()}</td>

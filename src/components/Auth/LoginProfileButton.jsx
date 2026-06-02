@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 import './LoginProfile.css';
 
 const LoginProfileButton = () => {
-    const { user, signInWithGoogle, signOut } = useAuth();
+    const { user, profile, signInWithGoogle, signOut } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -42,6 +42,11 @@ const LoginProfileButton = () => {
                     <div className="dropdown-account-details">
                         <p className="account-name">{user.user_metadata?.full_name || user.user_metadata?.name || 'User'}</p>
                         <p className="account-email">{user.email}</p>
+                        {profile?.student_id && (
+                            <p className="account-id" style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '4px' }}>
+                                ID: {profile.student_id}
+                            </p>
+                        )}
                     </div>
                     <hr className="dropdown-divider" />
                     <div className="dropdown-actions">
