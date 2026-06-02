@@ -333,7 +333,11 @@ const CoursesLanding = () => {
     setFormMessage(null);
 
     const isId = !inputEmail.includes('@');
-    const searchValue = inputEmail.trim();
+    let searchValue = inputEmail.trim();
+
+    if (isId && /^\d+$/.test(searchValue)) {
+      searchValue = searchValue.padStart(6, '0');
+    }
 
     // Query profiles to resolve student email and ID
     let profileQuery = supabase.from('profiles').select('email, student_id');
@@ -352,6 +356,12 @@ const CoursesLanding = () => {
 
     const resolvedEmail = profileData.email;
     const resolvedId = profileData.student_id;
+
+    if (!resolvedEmail) {
+      setFormMessage({ type: 'error', text: 'Student profile found, but their email is missing. Please ask the student to log out and log back in to sync their email, or run the database sync script.' });
+      setSavingMark(false);
+      return;
+    }
 
     // Check if the mark already exists for the student & paper combination to update
     const { data: existing, error: checkError } = await supabase
@@ -403,8 +413,12 @@ const CoursesLanding = () => {
     setSearchError('');
     setSearchResultMarks([]);
 
-    const searchValue = searchEmail.trim();
+    let searchValue = searchEmail.trim();
     const isId = !searchValue.includes('@');
+
+    if (isId && /^\d+$/.test(searchValue)) {
+      searchValue = searchValue.padStart(6, '0');
+    }
 
     let query = supabase.from('student_marks').select('*');
     if (isId) {
