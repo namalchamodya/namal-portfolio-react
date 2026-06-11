@@ -1,4 +1,27 @@
+# Namal Chamodya Hub — Robots.txt
+# https://namal-chamodya.space
+
 User-agent: *
 Allow: /
+Allow: /portfolio
+Allow: /courses
+Allow: /blog
+Allow: /store/electronics
+Allow: /store/books
+Allow: /store/software
+Allow: /art
+Allow: /art-portfolio
+Allow: /privacy
+Allow: /terms
 
+# Private / user-specific pages
+Disallow: /profile
+Disallow: /store/cart
+Disallow: /courses?tab=admin
+Disallow: /courses?tab=my
+
+# Crawl delay (polite crawling)
+Crawl-delay: 2
+
+# Sitemaps
 Sitemap: https://namal-chamodya.space/sitemap.xml

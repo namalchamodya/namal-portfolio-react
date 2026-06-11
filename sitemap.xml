@@ -1,25 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <!-- Homepage / Landing -->
    <url>
       <loc>https://namal-chamodya.space/</loc>
-      <lastmod>2023-10-27</lastmod>
-      <changefreq>monthly</changefreq>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>weekly</changefreq>
       <priority>1.0</priority>
    </url>
+
+   <!-- Portfolio -->
    <url>
       <loc>https://namal-chamodya.space/portfolio</loc>
+      <lastmod>2026-06-11</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
+      <priority>0.9</priority>
    </url>
+
+   <!-- Courses / Learning Hub (HIGH PRIORITY — Education) -->
    <url>
       <loc>https://namal-chamodya.space/courses</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.95</priority>
+   </url>
+
+   <!-- Blog -->
+   <url>
+      <loc>https://namal-chamodya.space/blog</loc>
+      <lastmod>2026-06-11</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
    </url>
+
+   <!-- Store: Electronics -->
    <url>
       <loc>https://namal-chamodya.space/store/electronics</loc>
+      <lastmod>2026-06-11</lastmod>
       <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+   </url>
+
+   <!-- Store: Books / Knowledge Base (Education) -->
+   <url>
+      <loc>https://namal-chamodya.space/store/books</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.85</priority>
+   </url>
+
+   <!-- Store: Software -->
+   <url>
+      <loc>https://namal-chamodya.space/store/software</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.75</priority>
+   </url>
+
+   <!-- Art Gallery -->
+   <url>
+      <loc>https://namal-chamodya.space/art</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>monthly</changefreq>
       <priority>0.7</priority>
    </url>
-   <!-- Add other pages similarly -->
+
+   <!-- Art Portfolio / Store -->
+   <url>
+      <loc>https://namal-chamodya.space/art-portfolio</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.65</priority>
+   </url>
+
+   <!-- Privacy Policy -->
+   <url>
+      <loc>https://namal-chamodya.space/privacy</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.3</priority>
+   </url>
+
+   <!-- Terms of Service -->
+   <url>
+      <loc>https://namal-chamodya.space/terms</loc>
+      <lastmod>2026-06-11</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.3</priority>
+   </url>
 </urlset>
